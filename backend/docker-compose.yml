@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: pokedex-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: pokedex
+      POSTGRES_PASSWORD: pokedex
+      POSTGRES_DB: pokedex_manager
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - pokedex_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  pokedex_postgres_data:
