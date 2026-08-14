@@ -11,3 +11,10 @@ export interface PokemonDetail extends PokemonSummary {
   height: number;
   weight: number;
 }
+
+export interface PokedexEntry {
+  pokemonId: number;
+  name: string | null;
+  sprite: string | null;
+  status: 'SEEN' | 'SCANNED' | null;
+}
