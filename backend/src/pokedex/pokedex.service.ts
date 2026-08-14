@@ -51,4 +51,32 @@ export class PokedexService {
       },
     });
   }
+
+  private async markAsScanned(
+    userId: number,
+    pokemonId: number,
+  ) {
+    const scannedAt = new Date();
+
+    return this.prisma.userPokemon.upsert({
+      where: {
+        userId_pokemonId: {
+          userId,
+          pokemonId,
+        },
+      },
+
+      create: {
+        userId,
+        pokemonId,
+        status: 'SCANNED',
+        scannedAt,
+      },
+
+      update: {
+        status: 'SCANNED',
+        scannedAt,
+      },
+    });
+  }
 }
