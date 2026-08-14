@@ -79,4 +79,39 @@ export class PokedexService {
       },
     });
   }
+
+  async registerEncounter(
+    userId: number,
+    dto: EncounterDto,
+  ) {
+    if (dto.seenPokemonIds.includes(dto.scannedPokemonId)) {
+      throw new BadRequestException(
+        'Scanned Pokémon cannot also be marked as seen',
+      );
+    }
+
+    await Promise.all(
+      dto.seenPokemonIds.map((pokemonId) =>
+        this.markAsSeen(userId, pokemonId),
+      ),
+    );
+
+    await this.markAsScanned(
+      userId,
+      dto.scannedPokemonId,
+    );
+
+    await this.prisma.scanHistory.create({
+      data: {
+        userId,
+        pokemonId: dto.scannedPokemonId,
+        source: 'WILD_SEARCH',
+      },
+    });
+
+    return {
+      scannedPokemonId: dto.scannedPokemonId,
+      seenPokemonIds: dto.seenPokemonIds,
+    };
+  }
 }
