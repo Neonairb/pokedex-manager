@@ -40,4 +40,11 @@ export class PokedexController {
       pokemonId,
     );
   }
+
+  @Get('history')
+  getHistory(
+    @CurrentUserId() userId: number,
+  ) {
+    return this.pokedexService.getHistory(userId);
+  }
 }

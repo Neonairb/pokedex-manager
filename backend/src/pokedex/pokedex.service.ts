@@ -121,7 +121,7 @@ export class PokedexService {
     if (pokemonId <= 1) {
       throw new BadRequestException('pokemonId must be greater than 0');
     }
-    
+
     await this.markAsScanned(
       userId,
       pokemonId,
@@ -139,5 +139,37 @@ export class PokedexService {
       pokemonId: pokemonId,
       status: 'SCANNED',
     };
+  }
+
+  async getHistory(userId: number) {
+    const history =
+      await this.prisma.scanHistory.findMany({
+        where: {
+          userId,
+        },
+
+        orderBy: {
+          scannedAt: 'desc',
+        },
+
+        take: 5,
+      });
+
+    return Promise.all(
+      history.map(async (scan) => {
+        const pokemon =
+          await this.pokemonService.getPokemonById(
+            scan.pokemonId,
+          );
+
+        return {
+          pokemonId: pokemon.pokemonId,
+          name: pokemon.name,
+          sprite: pokemon.sprite,
+          scannedAt: scan.scannedAt,
+          source: scan.source,
+        };
+      }),
+    );
   }
 }
