@@ -14,6 +14,8 @@ import {
 export class PokemonService {
   constructor(private readonly httpService: HttpService) {}
 
+  private readonly maxPokemonId = 1025;
+
   async getPokemonById(id: number): Promise<PokemonDetail> {
     try {
       const [pokemonResponse, speciesResponse] = await Promise.all([
