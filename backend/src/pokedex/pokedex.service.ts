@@ -172,4 +172,25 @@ export class PokedexService {
       }),
     );
   }
+
+  async getPokemonStatus(
+    userId: number,
+    pokemonId: number,
+  ) {
+    const userPokemon =
+      await this.prisma.userPokemon.findUnique({
+        where: {
+          userId_pokemonId: {
+            userId,
+            pokemonId,
+          },
+        },
+
+        select: {
+          status: true,
+        },
+      });
+
+    return userPokemon?.status ?? null;
+  }
 }
