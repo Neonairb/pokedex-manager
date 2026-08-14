@@ -164,4 +164,32 @@ export class PokemonService {
       );
     }
   }
+
+  async getPokemonSpeciesIds(): Promise<number[]> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get('/pokemon-species', {
+          params: {
+            limit: 2000,
+            offset: 0,
+          },
+        }),
+      );
+
+      return response.data.results
+        .map((species: { url: string }) => {
+          const parts = species.url
+            .split('/')
+            .filter(Boolean);
+
+          return Number(parts[parts.length - 1]);
+        })
+        .filter((id: number) => Number.isInteger(id))
+        .sort((a: number, b: number) => a - b);
+    } catch {
+      throw new ServiceUnavailableException(
+        'Unable to retrieve Pokédex index',
+      );
+    }
+  }
 }

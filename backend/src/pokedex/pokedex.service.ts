@@ -193,4 +193,61 @@ export class PokedexService {
 
     return userPokemon?.status ?? null;
   }
+
+  async getPokedex(userId: number) {
+    const [pokemonIds, userPokemon] =
+      await Promise.all([
+        this.pokemonService.getPokemonSpeciesIds(),
+
+        this.prisma.userPokemon.findMany({
+          where: {
+            userId,
+          },
+
+          select: {
+            pokemonId: true,
+            status: true,
+          },
+        }),
+      ]);
+
+    const knownPokemon = await Promise.all(
+      userPokemon.map(async (entry) => {
+        const pokemon =
+          await this.pokemonService.getPokemonSummary(
+            entry.pokemonId,
+          );
+
+        return {
+          pokemonId: entry.pokemonId,
+          name: pokemon.name,
+          sprite: pokemon.sprite,
+          status: entry.status,
+        };
+      }),
+    );
+
+    const knownPokemonMap = new Map(
+      knownPokemon.map((pokemon) => [
+        pokemon.pokemonId,
+        pokemon,
+      ]),
+    );
+
+    return pokemonIds.map((pokemonId) => {
+      const known =
+        knownPokemonMap.get(pokemonId);
+
+      if (known) {
+        return known;
+      }
+
+      return {
+        pokemonId,
+        name: null,
+        sprite: null,
+        status: null,
+      };
+    });
+  }
 }
