@@ -1,12 +1,14 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider               = "prisma-client"
+  output                 = "../src/generated/prisma"
+  moduleFormat           = "cjs"
+  generatedFileExtension = "cts"
+  importFileExtension    = "cjs"
 }
 
 datasource db {
   provider = "postgresql"
 }
-
 
 enum PokemonStatus {
   SEEN
@@ -25,8 +27,8 @@ model User {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
-  pokemon      UserPokemon[]
-  scanHistory  ScanHistory[]
+  pokemon     UserPokemon[]
+  scanHistory ScanHistory[]
 }
 
 model UserPokemon {
