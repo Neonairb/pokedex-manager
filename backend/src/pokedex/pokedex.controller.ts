@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  Param,
+  ParseIntPipe,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -25,6 +27,17 @@ export class PokedexController {
     return this.pokedexService.registerEncounter(
       userId,
       dto,
+    );
+  }
+
+  @Post('scan/:pokemonId')
+  scanPokemon(
+    @CurrentUserId() userId: number,
+    @Param('pokemonId', ParseIntPipe) pokemonId: number,
+  ) {
+    return this.pokedexService.scanPokemon(
+      userId,
+      pokemonId,
     );
   }
 }

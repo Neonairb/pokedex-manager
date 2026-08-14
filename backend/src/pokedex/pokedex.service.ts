@@ -5,7 +5,6 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { PokemonService } from '../pokemon/pokemon.service';
 import { EncounterDto } from './dto/encounter.dto';
-import { ScanPokemonDto } from './dto/scan-pokemon.dto';
 
 @Injectable()
 export class PokedexService {
@@ -112,6 +111,33 @@ export class PokedexService {
     return {
       scannedPokemonId: dto.scannedPokemonId,
       seenPokemonIds: dto.seenPokemonIds,
+    };
+  }
+
+  async scanPokemon(
+    userId: number,
+    pokemonId: number,
+  ) {
+    if (pokemonId <= 1) {
+      throw new BadRequestException('pokemonId must be greater than 0');
+    }
+    
+    await this.markAsScanned(
+      userId,
+      pokemonId,
+    );
+
+    await this.prisma.scanHistory.create({
+      data: {
+        userId,
+        pokemonId: pokemonId,
+        source: 'AI_IMAGE',
+      },
+    });
+
+    return {
+      pokemonId: pokemonId,
+      status: 'SCANNED',
     };
   }
 }
