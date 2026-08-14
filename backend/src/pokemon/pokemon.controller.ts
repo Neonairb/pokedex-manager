@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '../auth/auth.guard';
 import { PokemonService } from './pokemon.service';
+import { CurrentUserId } from '../auth/current-user-id.decorator';
 
 @Controller('pokemon')
 @UseGuards(AuthGuard)
@@ -16,8 +17,10 @@ export class PokemonController {
   ) {}
 
   @Get('wild-search')
-  getWildSearch() {
-    return this.pokemonService.getWildSearch();
+  getWildSearch(
+    @CurrentUserId() userId: number,
+  ) {
+    return this.pokemonService.getWildSearch(userId);
   }
 
   @Get(':id')

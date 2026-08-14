@@ -9,10 +9,14 @@ import {
   PokemonDetail,
   PokemonSummary,
 } from './interfaces/pokemon.interface';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class PokemonService {
-  constructor(private readonly httpService: HttpService) {}
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   private readonly maxPokemonId = 1025;
 
@@ -71,18 +75,45 @@ export class PokemonService {
     }
   }
 
-  async getWildSearch(): Promise<PokemonSummary[]> {
+  async getWildSearch(
+    userId: number,
+  ): Promise<PokemonSummary[]> {
     const ids = this.getRandomUniqueIds(3);
 
     const pokemon = await Promise.all(
       ids.map((id) => this.getPokemonById(id)),
     );
 
+    const registeredPokemon =
+      await this.prisma.userPokemon.findMany({
+        where: {
+          userId,
+
+          pokemonId: {
+            in: ids,
+          },
+        },
+
+        select: {
+          pokemonId: true,
+          status: true,
+        },
+      });
+
+    const statusMap = new Map(
+      registeredPokemon.map((item) => [
+        item.pokemonId,
+        item.status,
+      ]),
+    );
+
     return pokemon.map((item) => ({
       pokemonId: item.pokemonId,
       name: item.name,
       sprite: item.sprite,
-      status: null,
+
+      status:
+        statusMap.get(item.pokemonId) ?? null,
     }));
   }
 
