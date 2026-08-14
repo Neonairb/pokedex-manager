@@ -158,7 +158,7 @@ export class PokedexService {
     return Promise.all(
       history.map(async (scan) => {
         const pokemon =
-          await this.pokemonService.getPokemonById(
+          await this.pokemonService.getPokemonSummary(
             scan.pokemonId,
           );
 
