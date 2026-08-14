@@ -5,6 +5,9 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { PokemonService } from '../pokemon/pokemon.service';
 import { EncounterDto } from './dto/encounter.dto';
+import { Prisma } from '@prisma/client/extension';
+
+type TransactionClient = Prisma.TransactionClient;
 
 @Injectable()
 export class PokedexService {
@@ -14,11 +17,12 @@ export class PokedexService {
   ) {}
 
   private async markAsSeen(
+    tx: TransactionClient,
     userId: number,
     pokemonId: number,
   ) {
     const existing =
-      await this.prisma.userPokemon.findUnique({
+      await tx.userPokemon.findUnique({
         where: {
           userId_pokemonId: {
             userId,
@@ -31,7 +35,7 @@ export class PokedexService {
       return existing;
     }
 
-    return this.prisma.userPokemon.upsert({
+    return tx.userPokemon.upsert({
       where: {
         userId_pokemonId: {
           userId,
@@ -52,12 +56,13 @@ export class PokedexService {
   }
 
   private async markAsScanned(
+    tx: TransactionClient,
     userId: number,
     pokemonId: number,
   ) {
     const scannedAt = new Date();
 
-    return this.prisma.userPokemon.upsert({
+    return tx.userPokemon.upsert({
       where: {
         userId_pokemonId: {
           userId,
@@ -83,62 +88,70 @@ export class PokedexService {
     userId: number,
     dto: EncounterDto,
   ) {
-    if (dto.seenPokemonIds.includes(dto.scannedPokemonId)) {
+    if (
+      dto.seenPokemonIds.includes(
+        dto.scannedPokemonId,
+      )
+    ) {
       throw new BadRequestException(
         'Scanned Pokémon cannot also be marked as seen',
       );
     }
 
-    await Promise.all(
-      dto.seenPokemonIds.map((pokemonId) =>
-        this.markAsSeen(userId, pokemonId),
-      ),
-    );
+    return this.prisma.$transaction(async (tx) => {
+      for (const pokemonId of dto.seenPokemonIds) {
+        await this.markAsSeen(
+          tx,
+          userId,
+          pokemonId,
+        );
+      }
 
-    await this.markAsScanned(
-      userId,
-      dto.scannedPokemonId,
-    );
-
-    await this.prisma.scanHistory.create({
-      data: {
+      await this.markAsScanned(
+        tx,
         userId,
-        pokemonId: dto.scannedPokemonId,
-        source: 'WILD_SEARCH',
-      },
-    });
+        dto.scannedPokemonId,
+      );
 
-    return {
-      scannedPokemonId: dto.scannedPokemonId,
-      seenPokemonIds: dto.seenPokemonIds,
-    };
+      await tx.scanHistory.create({
+        data: {
+          userId,
+          pokemonId: dto.scannedPokemonId,
+          source: 'WILD_SEARCH',
+        },
+      });
+
+      return {
+        scannedPokemonId: dto.scannedPokemonId,
+        seenPokemonIds: dto.seenPokemonIds,
+      };
+    });
   }
 
   async scanPokemon(
     userId: number,
     pokemonId: number,
   ) {
-    if (pokemonId <= 1) {
-      throw new BadRequestException('pokemonId must be greater than 0');
-    }
-
-    await this.markAsScanned(
-      userId,
-      pokemonId,
-    );
-
-    await this.prisma.scanHistory.create({
-      data: {
+    return this.prisma.$transaction(async (tx) => {
+      await this.markAsScanned(
+        tx,
         userId,
-        pokemonId: pokemonId,
-        source: 'AI_IMAGE',
-      },
-    });
+        pokemonId,
+      );
 
-    return {
-      pokemonId: pokemonId,
-      status: 'SCANNED',
-    };
+      await tx.scanHistory.create({
+        data: {
+          userId,
+          pokemonId: pokemonId,
+          source: 'AI_IMAGE',
+        },
+      });
+
+      return {
+        pokemonId: pokemonId,
+        status: 'SCANNED',
+      };
+    });
   }
 
   async getHistory(userId: number) {
