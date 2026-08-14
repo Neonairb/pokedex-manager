@@ -70,4 +70,32 @@ export class PokemonService {
       );
     }
   }
+
+  async getWildSearch(): Promise<PokemonSummary[]> {
+    const ids = this.getRandomUniqueIds(3);
+
+    const pokemon = await Promise.all(
+      ids.map((id) => this.getPokemonById(id)),
+    );
+
+    return pokemon.map((item) => ({
+      pokemonId: item.pokemonId,
+      name: item.name,
+      sprite: item.sprite,
+      status: null,
+    }));
+  }
+
+  private getRandomUniqueIds(amount: number): number[] {
+    const ids = new Set<number>();
+
+    while (ids.size < amount) {
+      const id =
+        Math.floor(Math.random() * this.maxPokemonId) + 1;
+
+      ids.add(id);
+    }
+
+    return [...ids];
+  }
 }

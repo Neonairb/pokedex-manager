@@ -15,6 +15,11 @@ export class PokemonController {
     private readonly pokemonService: PokemonService,
   ) {}
 
+  @Get('wild-search')
+  getWildSearch() {
+    return this.pokemonService.getWildSearch();
+  }
+
   @Get(':id')
   getPokemonById(
     @Param('id', ParseIntPipe) id: number,
