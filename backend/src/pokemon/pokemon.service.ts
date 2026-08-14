@@ -192,4 +192,43 @@ export class PokemonService {
       );
     }
   }
+
+  async getPokemonForUser(
+    userId: number,
+    pokemonId: number,
+  ) {
+    const userPokemon =
+      await this.prisma.userPokemon.findUnique({
+        where: {
+          userId_pokemonId: {
+            userId,
+            pokemonId,
+          },
+        },
+      });
+
+    if (!userPokemon) {
+      throw new NotFoundException(
+        'Pokémon has not been discovered',
+      );
+    }
+
+    if (userPokemon.status === 'SEEN') {
+      const pokemon =
+        await this.getPokemonSummary(pokemonId);
+
+      return {
+        ...pokemon,
+        status: 'SEEN',
+      };
+    }
+
+    const pokemon =
+      await this.getPokemonById(pokemonId);
+
+    return {
+      ...pokemon,
+      status: 'SCANNED',
+    };
+  }
 }

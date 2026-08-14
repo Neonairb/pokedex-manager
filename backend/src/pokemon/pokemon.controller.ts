@@ -25,8 +25,12 @@ export class PokemonController {
 
   @Get(':id')
   getPokemonById(
-    @Param('id', ParseIntPipe) id: number,
+    @CurrentUserId() userId: number,
+    @Param('id', ParseIntPipe) pokemonId: number,
   ) {
-    return this.pokemonService.getPokemonById(id);
+    return this.pokemonService.getPokemonForUser(
+      userId,
+      pokemonId,
+    );
   }
 }
