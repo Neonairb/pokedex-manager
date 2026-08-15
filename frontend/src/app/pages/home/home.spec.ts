@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 
 import { WildSearchPokemon } from '../../core/models/pokedex.model';
@@ -42,6 +43,7 @@ describe('Home', () => {
     await TestBed.configureTestingModule({
       imports: [Home],
       providers: [
+        provideRouter([]),
         {
           provide: PokedexService,
           useValue: pokedexService,

@@ -14,6 +14,7 @@ describe('AiService', () => {
   };
   const pokedexService = {
     scanPokemon: jest.fn(),
+    getProgress: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -88,9 +89,7 @@ describe('AiService', () => {
       requiresConfirmation: false,
     });
 
-    expect(pokemonService.getPokemonIdByName).toHaveBeenCalledWith(
-      'pikachu',
-    );
+    expect(pokemonService.getPokemonIdByName).toHaveBeenCalledWith('pikachu');
     expect(pokedexService.scanPokemon).toHaveBeenCalledWith(7, 25);
     expect(pokemonService.getPokemonById).toHaveBeenCalledWith(25);
   });
@@ -148,5 +147,55 @@ describe('AiService', () => {
 
     expect(pokemonService.getPokemonIdByName).not.toHaveBeenCalled();
     expect(pokedexService.scanPokemon).not.toHaveBeenCalled();
+  });
+
+  it('generates wild-search advice from the encounter and trainer progress', async () => {
+    const encounter = [
+      {
+        pokemonId: 144,
+        name: 'articuno',
+        sprite: 'articuno.png',
+        status: null,
+        position: 'left' as const,
+      },
+      {
+        pokemonId: 25,
+        name: 'pikachu',
+        sprite: 'pikachu.png',
+        status: 'SEEN' as const,
+        position: 'center' as const,
+      },
+      {
+        pokemonId: 6,
+        name: 'charizard',
+        sprite: 'charizard.png',
+        status: 'SCANNED' as const,
+        position: 'right' as const,
+      },
+    ];
+    const progress = {
+      totalScanned: 4,
+      byType: [{ type: 'ice', count: 0 }],
+    };
+    pokedexService.getProgress.mockResolvedValue(progress);
+    generateContent.mockResolvedValue({
+      text: '  Trainer, check the one on the left!\nThose icy wings stand out.  ',
+    });
+
+    await expect(service.getWildSearchAdvice(7, encounter)).resolves.toBe(
+      'Trainer, check the one on the left!\nThose icy wings stand out.',
+    );
+
+    expect(pokedexService.getProgress).toHaveBeenCalledWith(7);
+    expect(generateContent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        contents: expect.stringContaining(JSON.stringify(encounter)),
+      }),
+    );
+    expect(generateContent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        contents: expect.stringContaining(JSON.stringify(progress)),
+      }),
+    );
   });
 });

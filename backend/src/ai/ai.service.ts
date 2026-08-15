@@ -12,6 +12,7 @@ import {
   PokemonImageScanResult,
   UploadedImage,
 } from './interfaces/pokemon-identification.interface';
+import type { WildSearchPokemon } from '../pokemon/interfaces/pokemon.interface';
 
 export const AI_CLIENT = Symbol('AI_CLIENT');
 
@@ -31,6 +32,40 @@ Follow these rules:
 8. Do not provide descriptions, trivia, explanations, or additional text.
 
 Your response must follow the provided structured output schema.`;
+
+const wildSearchAdviceInstructions = `You are the voice of an in-universe Pokémon Pokédex assistant.
+
+Your task is to recommend exactly one Pokémon from the trainer's current wild encounter.
+
+The trainer cannot see the Pokémon's name or Pokédex number during the encounter. They can only see its appearance and position on screen.
+
+In the encounter data, a null status means the Pokémon is UNKNOWN.
+
+Recommendation priority:
+
+1. If one of the encountered Pokémon is a Legendary Pokémon, Mythical Pokémon, or Ultra Beast and it has not already been SCANNED, strongly prioritize recommending it.
+2. If multiple rare Pokémon are present, prefer one that has not been SCANNED and that adds more useful variety to the trainer's Pokédex.
+3. Avoid recommending Pokémon already marked as SCANNED unless all other choices are clearly less valuable.
+4. Among normal Pokémon, prioritize types that are underrepresented in the trainer's scanned collection.
+5. Prefer UNKNOWN Pokémon over SEEN Pokémon when the choices are otherwise similar.
+6. If several choices are equally useful, choose the most interesting option and present it as a fun recommendation.
+
+Communication rules:
+
+- Recommend exactly one of the three encountered Pokémon.
+- The trainer does not know the Pokémon's name yet, so do NOT reveal its name or Pokédex number.
+- Identify the recommended Pokémon by its position: left, center, or right.
+- Also give one short visual clue describing a recognizable feature of its appearance.
+- Do not reveal hidden information that the trainer should only discover after scanning.
+- Speak directly to the trainer.
+- Sound like a friendly, energetic Pokédex from a Pokémon game.
+- Keep the response playful and concise.
+- Maximum length: 3 short lines.
+- Do not use paragraphs longer than one sentence.
+- Do not mention AI, JSON, statistics, databases, prompts, or provided data.
+- Do not fabricate Pokémon types, rarity, collection statistics, or visual features.
+
+Return only the message shown to the trainer.`;
 
 @Injectable()
 export class AiService {
@@ -76,6 +111,36 @@ export class AiService {
       status: 'SCANNED',
       requiresConfirmation: false,
     };
+  }
+
+  async getWildSearchAdvice(
+    userId: number,
+    encounter: WildSearchPokemon[],
+  ): Promise<string> {
+    const progress = await this.pokedexService.getProgress(userId);
+
+    try {
+      const response = await this.ai.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: `Current wild encounter:\n${JSON.stringify(encounter)}\n\nTrainer Pokédex progress:\n${JSON.stringify(progress)}`,
+        config: {
+          systemInstruction: wildSearchAdviceInstructions,
+          temperature: 0.7,
+        },
+      });
+
+      const advice = response.text?.trim();
+
+      if (!advice) {
+        throw new Error('Gemini returned an empty response');
+      }
+
+      return advice;
+    } catch {
+      throw new ServiceUnavailableException(
+        'Unable to recommend a Pokémon for this encounter',
+      );
+    }
   }
 
   private async identifyPokemon(
@@ -160,8 +225,7 @@ export class AiService {
 
     return (
       typeof result.identified === 'boolean' &&
-      (typeof result.pokemonName === 'string' ||
-        result.pokemonName === null) &&
+      (typeof result.pokemonName === 'string' || result.pokemonName === null) &&
       typeof result.confidence === 'number' &&
       Number.isFinite(result.confidence) &&
       result.confidence >= 0 &&

@@ -7,6 +7,7 @@ describe('AiController', () => {
   let controller: AiController;
   const aiService = {
     scanPokemonImage: jest.fn(),
+    getWildSearchAdvice: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -56,6 +57,54 @@ describe('AiController', () => {
         buffer: Buffer.from('image'),
         mimetype: 'image/gif',
       }),
+    ).toThrow(BadRequestException);
+  });
+
+  it('passes a three-position wild encounter to the AI service', async () => {
+    const encounter = [
+      {
+        pokemonId: 1,
+        name: 'bulbasaur',
+        sprite: 'bulbasaur.png',
+        status: null,
+        position: 'left' as const,
+      },
+      {
+        pokemonId: 4,
+        name: 'charmander',
+        sprite: 'charmander.png',
+        status: 'SEEN' as const,
+        position: 'center' as const,
+      },
+      {
+        pokemonId: 7,
+        name: 'squirtle',
+        sprite: 'squirtle.png',
+        status: 'SCANNED' as const,
+        position: 'right' as const,
+      },
+    ];
+    const advice = 'Trainer, check the one on the left!';
+    aiService.getWildSearchAdvice.mockResolvedValue(advice);
+
+    await expect(controller.getWildSearchAdvice(7, encounter)).resolves.toBe(
+      advice,
+    );
+    expect(aiService.getWildSearchAdvice).toHaveBeenCalledWith(7, encounter);
+  });
+
+  it('rejects an encounter without three unique positions', () => {
+    const encounter = [
+      { position: 'left' },
+      { position: 'left' },
+      { position: 'right' },
+    ];
+
+    expect(() =>
+      controller.getWildSearchAdvice(
+        7,
+        encounter as Parameters<AiController['getWildSearchAdvice']>[1],
+      ),
     ).toThrow(BadRequestException);
   });
 });

@@ -1,9 +1,11 @@
 import {
   BadRequestException,
+  Body,
   Controller,
   HttpCode,
   HttpStatus,
   Post,
+  ParseArrayPipe,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -13,12 +15,9 @@ import { AuthGuard } from '../auth/auth.guard';
 import { CurrentUserId } from '../auth/current-user-id.decorator';
 import { AiService } from './ai.service';
 import type { UploadedImage } from './interfaces/pokemon-identification.interface';
+import { WildSearchPokemonDto } from './dto/wild-search-pokemon.dto';
 
-const allowedImageTypes = new Set([
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-]);
+const allowedImageTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
 @Controller('ai')
 @UseGuards(AuthGuard)
@@ -50,5 +49,27 @@ export class AiController {
     }
 
     return this.aiService.scanPokemonImage(userId, image);
+  }
+
+  @Post('wild-search-advice')
+  @HttpCode(HttpStatus.OK)
+  getWildSearchAdvice(
+    @CurrentUserId() userId: number,
+    @Body(new ParseArrayPipe({ items: WildSearchPokemonDto }))
+    encounter: WildSearchPokemonDto[],
+  ) {
+    if (encounter.length !== 3) {
+      throw new BadRequestException(
+        'A wild encounter must contain exactly three Pokémon',
+      );
+    }
+
+    if (new Set(encounter.map((pokemon) => pokemon.position)).size !== 3) {
+      throw new BadRequestException(
+        'A wild encounter must contain left, center, and right positions',
+      );
+    }
+
+    return this.aiService.getWildSearchAdvice(userId, encounter);
   }
 }

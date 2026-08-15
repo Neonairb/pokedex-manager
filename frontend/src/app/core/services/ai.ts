@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 
 import { environment } from '../../../environments/environment';
-import { AiImageScanResponse } from '../models/pokedex.model';
+import { AiImageScanResponse, WildSearchPokemon } from '../models/pokedex.model';
 
 @Service()
 export class AiService {
@@ -13,9 +13,12 @@ export class AiService {
     const formData = new FormData();
     formData.append('image', image);
 
-    return this.http.post<AiImageScanResponse>(
-      `${this.apiUrl}/scan-image`,
-      formData,
-    );
+    return this.http.post<AiImageScanResponse>(`${this.apiUrl}/scan-image`, formData);
+  }
+
+  getWildSearchAdvice(encounter: WildSearchPokemon[]) {
+    return this.http.post(`${this.apiUrl}/wild-search-advice`, encounter, {
+      responseType: 'text',
+    });
   }
 }
