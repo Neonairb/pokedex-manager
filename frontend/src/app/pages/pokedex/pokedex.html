@@ -18,6 +18,73 @@
   </header>
 
   <div class="pokedex-content">
+    @if (isDetailLoading()) {
+      <div class="detail-loading" aria-live="polite">
+        <div class="detail-scanner" aria-hidden="true"></div>
+        <strong>Reading Pokédex data…</strong>
+      </div>
+    } @else if (detailError()) {
+      <div class="pokedex-message" role="alert">
+        <span>Unable to retrieve this Pokémon record.</span>
+        <button type="button" (click)="closePokemon()">Return to Pokédex</button>
+      </div>
+    } @else if (selectedPokemon(); as pokemon) {
+      <article class="pokedex-detail" [class.pokedex-detail--seen]="pokemon.status === 'SEEN'">
+        <div class="detail-console">
+          <button class="detail-back" type="button" (click)="closePokemon()">
+            <span aria-hidden="true">‹</span> Pokédex list
+          </button>
+
+          <div class="detail-hero">
+            @if (pokemon.sprite) {
+              <img
+                [src]="pokemon.sprite"
+                [alt]="pokemon.status === 'SCANNED' ? pokemon.name : 'Seen Pokémon'"
+              />
+            }
+            <span class="detail-scan-line" aria-hidden="true"></span>
+          </div>
+
+          <div class="detail-interface">
+            <header class="detail-identity">
+              <div class="detail-title">
+                <span class="detail-pokeball" aria-hidden="true"></span>
+                <span class="detail-number">{{ pokemon.pokemonId.toString().padStart(4, '0') }}</span>
+                <h2>{{ pokemon.status === 'SCANNED' ? pokemon.name : '???' }}</h2>
+              </div>
+
+              @if (selectedDetail(); as detail) {
+                <div class="detail-types" aria-label="Pokémon types">
+                  @for (type of detail.types; track type) {
+                    <app-pokemon-type [type]="type" />
+                  }
+                </div>
+              }
+            </header>
+
+            @if (selectedDetail(); as detail) {
+              <dl class="detail-measurements">
+                <div><dt>Height</dt><dd>{{ detail.height / 10 }} <small>m</small></dd></div>
+                <div><dt>Weight</dt><dd>{{ detail.weight / 10 }} <small>kg</small></dd></div>
+              </dl>
+
+              <section class="detail-entry-text" aria-labelledby="entry-description-title">
+                <h3 id="entry-description-title">Pokédex entry</h3>
+                <p class="detail-description">
+                  {{ detail.description || 'No Pokédex description is available.' }}
+                </p>
+              </section>
+            } @else {
+              <section class="detail-entry-text detail-entry-text--locked">
+                <h3>Seen Pokémon</h3>
+                <p>Scan this Pokémon during a Wild Search to unlock its type, measurements, and Pokédex entry.</p>
+              </section>
+            }
+
+          </div>
+        </div>
+      </article>
+    } @else {
     <div class="pokedex-toolbar">
       <div>
         <p>Pokédex completion</p>
@@ -59,7 +126,13 @@
             [class.pokedex-entry--unknown]="entry.status === null"
             [class.pokedex-entry--seen]="entry.status === 'SEEN'"
             [class.pokedex-entry--scanned]="entry.status === 'SCANNED'"
+            [class.pokedex-entry--interactive]="entry.status !== null"
+            [attr.role]="entry.status !== null ? 'button' : null"
+            [attr.tabindex]="entry.status !== null ? 0 : null"
             [attr.aria-label]="entry.status === null ? 'Undiscovered Pokédex entry' : entry.status === 'SEEN' ? 'Seen Pokémon number ' + entry.pokemonId : entry.name"
+            (click)="openPokemon(entry)"
+            (keydown.enter)="openPokemon(entry)"
+            (keydown.space)="openPokemon(entry); $event.preventDefault()"
           >
             <span class="entry-number">#{{ entry.pokemonId.toString().padStart(4, '0') }}</span>
 
@@ -78,6 +151,7 @@
           </article>
         }
       </div>
+    }
     }
   </div>
 </section>

@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
 import { PokedexService } from '../../core/services/pokedex';
+import { PokemonService } from '../../core/services/pokemon';
 import { Pokedex } from './pokedex';
 
 describe('Pokedex', () => {
@@ -26,9 +27,24 @@ describe('Pokedex', () => {
       ]),
     ),
   };
+  const pokemonService = {
+    getPokemon: vi.fn(() =>
+      of({
+        pokemonId: 7,
+        name: 'squirtle',
+        sprite: 'squirtle.png',
+        status: 'SCANNED' as const,
+        description: 'A tiny turtle Pokémon.',
+        types: ['water'],
+        height: 5,
+        weight: 90,
+      }),
+    ),
+  };
 
   beforeEach(async () => {
     pokedexService.getPokedex.mockClear();
+    pokemonService.getPokemon.mockClear();
 
     await TestBed.configureTestingModule({
       imports: [Pokedex],
@@ -36,6 +52,10 @@ describe('Pokedex', () => {
         {
           provide: PokedexService,
           useValue: pokedexService,
+        },
+        {
+          provide: PokemonService,
+          useValue: pokemonService,
         },
       ],
     }).compileComponents();
@@ -71,5 +91,20 @@ describe('Pokedex', () => {
     expect(element.querySelectorAll('.pokedex-entry')).toHaveLength(1);
     expect(element.textContent).toContain('squirtle');
     expect(element.textContent).not.toContain('charmander');
+  });
+
+  it('opens the full record for a scanned Pokémon', () => {
+    const element = fixture.nativeElement as HTMLElement;
+    const scannedEntry = element.querySelector<HTMLElement>(
+      '.pokedex-entry--scanned',
+    );
+
+    scannedEntry?.click();
+    fixture.detectChanges();
+
+    expect(pokemonService.getPokemon).toHaveBeenCalledWith(7);
+    expect(element.querySelector('.pokedex-detail')).toBeTruthy();
+    expect(element.textContent).toContain('A tiny turtle Pokémon.');
+    expect(element.textContent).toContain('water');
   });
 });

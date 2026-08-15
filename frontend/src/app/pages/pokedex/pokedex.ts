@@ -1,19 +1,26 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-import { PokedexEntry } from '../../core/models/pokedex.model';
+import {
+  PokedexEntry,
+  PokemonDetail,
+  PokemonSummary,
+} from '../../core/models/pokedex.model';
 import { PokedexService } from '../../core/services/pokedex';
+import { PokemonService } from '../../core/services/pokemon';
+import { PokemonType } from '../../shared/components/pokemon-type/pokemon-type';
 
 type PokedexFilter = 'ALL' | 'SCANNED' | 'SEEN';
 
 @Component({
   selector: 'app-pokedex',
-  imports: [RouterLink],
+  imports: [PokemonType, RouterLink],
   templateUrl: './pokedex.html',
   styleUrl: './pokedex.css',
 })
 export class Pokedex implements OnInit {
   private readonly pokedexService = inject(PokedexService);
+  private readonly pokemonService = inject(PokemonService);
 
   protected readonly placeholderSlots = Array.from(
     { length: 30 },
@@ -23,6 +30,11 @@ export class Pokedex implements OnInit {
   protected readonly activeFilter = signal<PokedexFilter>('ALL');
   protected readonly isLoading = signal(true);
   protected readonly loadError = signal(false);
+  protected readonly selectedPokemon = signal<
+    PokemonDetail | PokemonSummary | null
+  >(null);
+  protected readonly isDetailLoading = signal(false);
+  protected readonly detailError = signal(false);
 
   protected readonly scannedCount = computed(
     () => this.entries().filter((entry) => entry.status === 'SCANNED').length,
@@ -36,6 +48,11 @@ export class Pokedex implements OnInit {
     }
 
     return this.entries().filter((entry) => entry.status === filter);
+  });
+
+  protected readonly selectedDetail = computed(() => {
+    const pokemon = this.selectedPokemon();
+    return pokemon && 'types' in pokemon ? pokemon : null;
   });
 
   ngOnInit(): void {
@@ -60,5 +77,32 @@ export class Pokedex implements OnInit {
         this.isLoading.set(false);
       },
     });
+  }
+
+  protected openPokemon(entry: PokedexEntry): void {
+    if (entry.status === null) {
+      return;
+    }
+
+    this.isDetailLoading.set(true);
+    this.detailError.set(false);
+    this.selectedPokemon.set(null);
+
+    this.pokemonService.getPokemon(entry.pokemonId).subscribe({
+      next: (pokemon) => {
+        this.selectedPokemon.set(pokemon);
+        this.isDetailLoading.set(false);
+      },
+      error: () => {
+        this.detailError.set(true);
+        this.isDetailLoading.set(false);
+      },
+    });
+  }
+
+  protected closePokemon(): void {
+    this.selectedPokemon.set(null);
+    this.detailError.set(false);
+    this.isDetailLoading.set(false);
   }
 }
