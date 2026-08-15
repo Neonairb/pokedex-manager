@@ -37,8 +37,8 @@ body {
 
 body {
   background:
-    radial-gradient(circle at 50% 15%, rgb(255 255 255 / 70%), transparent 34rem),
-    linear-gradient(145deg, #f4e8da, #d8c6b5);
+    linear-gradient(rgb(25 39 32 / 18%), rgb(20 31 27 / 32%)),
+    url('/assets/backgrounds/b3.webp') center / cover fixed no-repeat;
   color: var(--color-ink);
   font-family: var(--font-family-primary);
 }
