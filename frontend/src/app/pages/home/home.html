@@ -107,7 +107,13 @@
       </button>
 
       @if (wildSearchError()) {
-        <div class="search-error" role="alert">{{ wildSearchError() }}</div>
+        <app-pokedex-message
+          class="scanner-message"
+          code="HABITAT LINK"
+          heading="Wild search interrupted"
+          [message]="wildSearchError()"
+          tone="danger"
+        />
       }
 
       @if (scannedPokemon(); as pokemon) {
@@ -202,10 +208,14 @@
         (change)="uploadPokemonImage(imageInput)"
       />
 
-      @if (imageScanError()) {
-        <div class="search-error image-scan__error" role="alert">
-          {{ imageScanError() }}
-        </div>
+      @if (imageScanError(); as notice) {
+        <app-pokedex-message
+          class="scanner-message image-scan__message"
+          [code]="notice.code"
+          [heading]="notice.heading"
+          [message]="notice.message"
+          [tone]="notice.tone"
+        />
       }
 
       @if (imageScannedPokemon(); as pokemon) {

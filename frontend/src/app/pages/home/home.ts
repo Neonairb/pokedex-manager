@@ -14,11 +14,22 @@ import { AiService } from '../../core/services/ai';
 import { PokedexService } from '../../core/services/pokedex';
 import { PokemonService } from '../../core/services/pokemon';
 import { Auth } from '../../core/services/auth';
+import {
+  PokedexMessage,
+  type PokedexMessageTone,
+} from '../../shared/components/pokedex-message/pokedex-message';
 import { PokemonType } from '../../shared/components/pokemon-type/pokemon-type';
+
+interface ScannerNotice {
+  code: string;
+  heading: string;
+  message: string;
+  tone: PokedexMessageTone;
+}
 
 @Component({
   selector: 'app-home',
-  imports: [NgTemplateOutlet, PokemonType, RouterLink],
+  imports: [NgTemplateOutlet, PokedexMessage, PokemonType, RouterLink],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
@@ -45,7 +56,7 @@ export class Home implements OnInit {
   protected readonly suspectedPokemon = signal<AiScanSuspect | null>(null);
   protected readonly isImageScanning = signal(false);
   protected readonly isConfirmingSuspect = signal(false);
-  protected readonly imageScanError = signal('');
+  protected readonly imageScanError = signal<ScannerNotice | null>(null);
 
   ngOnInit(): void {
     this.loadRecentScans();
@@ -142,7 +153,7 @@ export class Home implements OnInit {
     }
 
     this.isImageScanning.set(true);
-    this.imageScanError.set('');
+    this.imageScanError.set(null);
     this.suspectedPokemon.set(null);
     this.imageScannedPokemon.set(null);
 
@@ -174,7 +185,7 @@ export class Home implements OnInit {
     }
 
     this.isConfirmingSuspect.set(true);
-    this.imageScanError.set('');
+    this.imageScanError.set(null);
 
     this.pokedexService
       .scanPokemon(suspect.pokemonId)
@@ -184,7 +195,13 @@ export class Home implements OnInit {
       .subscribe({
         next: (pokemon) => {
           if (!('types' in pokemon)) {
-            this.imageScanError.set('Full scan data is unavailable.');
+            this.imageScanError.set({
+              code: 'DATA LINK 204',
+              heading: 'Scan data incomplete',
+              message:
+                'The Pokémon was registered, but its full Pokédex record could not be loaded.',
+              tone: 'warning',
+            });
             this.isConfirmingSuspect.set(false);
             return;
           }
@@ -195,9 +212,13 @@ export class Home implements OnInit {
           this.loadRecentScans();
         },
         error: () => {
-          this.imageScanError.set(
-            'The Pokédex could not register this Pokémon. Please try again.',
-          );
+          this.imageScanError.set({
+            code: 'REGISTRY ERROR',
+            heading: 'Registration interrupted',
+            message:
+              'The Pokédex could not register this Pokémon. Please try the confirmation again.',
+            tone: 'danger',
+          });
           this.isConfirmingSuspect.set(false);
         },
       });
@@ -205,7 +226,7 @@ export class Home implements OnInit {
 
   protected chooseAnotherImage(fileInput: HTMLInputElement): void {
     this.suspectedPokemon.set(null);
-    this.imageScanError.set('');
+    this.imageScanError.set(null);
     fileInput.value = '';
     fileInput.click();
   }
@@ -213,27 +234,54 @@ export class Home implements OnInit {
   protected resetImageScan(): void {
     this.imageScannedPokemon.set(null);
     this.suspectedPokemon.set(null);
-    this.imageScanError.set('');
+    this.imageScanError.set(null);
   }
 
-  private getImageScanError(error: HttpErrorResponse): string {
+  private getImageScanError(error: HttpErrorResponse): ScannerNotice {
     if (error.status === 404) {
-      return 'No Pokémon signal was found in that image. Try another photo.';
+      return {
+        code: 'VISUAL SCAN 404',
+        heading: 'No match detected',
+        message:
+          'No Pokémon signature could be confirmed. Reframe the subject in good light and try another image.',
+        tone: 'warning',
+      };
     }
 
     if (error.status === 503 || error.status === 0) {
-      return 'It seems the image recognition is not available right now.';
+      return {
+        code: 'VISION MODULE 503',
+        heading: 'Recognition system offline',
+        message:
+          'The Pokédex image recognition module is unavailable right now. Please try again shortly.',
+        tone: 'danger',
+      };
     }
 
     if (error.status === 413) {
-      return 'That image is too large for the Pokédex. Choose one under 10 MB.';
+      return {
+        code: 'IMAGE CAPACITY',
+        heading: 'Image data too large',
+        message: 'Choose an image under 10 MB and restart the visual scan.',
+        tone: 'warning',
+      };
     }
 
     if (error.status === 400) {
-      return 'The Pokédex could not read that image. Use a JPEG, PNG, or WebP file.';
+      return {
+        code: 'FORMAT CHECK',
+        heading: 'Unreadable image data',
+        message: 'Load a valid JPEG, PNG, or WebP image into the scanner.',
+        tone: 'warning',
+      };
     }
 
-    return 'The image scan was interrupted. Please try again.';
+    return {
+      code: 'SCAN INTERRUPTED',
+      heading: 'Visual scan failed',
+      message: 'The image scan was interrupted. Reset the scanner and try again.',
+      tone: 'danger',
+    };
   }
 
   protected logout(): void {
