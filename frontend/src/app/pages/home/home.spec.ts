@@ -33,12 +33,14 @@ describe('Home', () => {
   };
   const aiService = {
     scanImage: vi.fn(),
+    getWildSearchAdvice: vi.fn(),
   };
 
   beforeEach(async () => {
     pokedexService.getScanHistory.mockClear();
     pokemonService.getWildSearch.mockClear();
     aiService.scanImage.mockClear();
+    aiService.getWildSearchAdvice.mockClear();
 
     await TestBed.configureTestingModule({
       imports: [Home],
@@ -117,5 +119,26 @@ describe('Home', () => {
     expect(cards[0].classList).toContain('encounter-card--right');
     expect(cards[1].classList).toContain('encounter-card--left');
     expect(cards[2].classList).toContain('encounter-card--center');
+  });
+
+  it('shows Pokédex advice for the current wild encounter', () => {
+    const encounter: WildSearchPokemon[] = [
+      { pokemonId: 1, name: 'bulbasaur', sprite: null, status: null, position: 'left' },
+      { pokemonId: 4, name: 'charmander', sprite: null, status: null, position: 'center' },
+      { pokemonId: 7, name: 'squirtle', sprite: null, status: null, position: 'right' },
+    ];
+    const advice = 'Trainer, check the one on the left!\nLook for the bulb on its back.';
+    pokemonService.getWildSearch.mockReturnValueOnce(of(encounter));
+    aiService.getWildSearchAdvice.mockReturnValueOnce(of(advice));
+
+    component['startWildSearch']();
+    fixture.detectChanges();
+    (fixture.nativeElement as HTMLElement)
+      .querySelector<HTMLButtonElement>('.advice-trigger')
+      ?.click();
+    fixture.detectChanges();
+
+    expect(aiService.getWildSearchAdvice).toHaveBeenCalledWith(encounter);
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain(advice);
   });
 });

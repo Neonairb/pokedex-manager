@@ -150,6 +150,38 @@
             </button>
           }
         </div>
+
+        @if (wildSearchAdvice()) {
+          <app-pokedex-message
+            class="advice-message"
+            code="PKDX ADVISOR"
+            heading="Recommended scan"
+            [message]="wildSearchAdvice()"
+            tone="info"
+          />
+        } @else {
+          <button
+            class="advice-trigger"
+            type="button"
+            [disabled]="isAdviceLoading() || isScanning()"
+            (click)="askForWildSearchAdvice()"
+          >
+            <span class="advice-trigger__icon" aria-hidden="true">
+              <i></i><i></i><i></i>
+            </span>
+            <span>{{ isAdviceLoading() ? 'Analyzing encounter…' : 'Ask for advice' }}</span>
+          </button>
+
+          @if (wildSearchAdviceError()) {
+            <app-pokedex-message
+              class="advice-message"
+              code="ADVISOR LINK"
+              heading="Advice unavailable"
+              [message]="wildSearchAdviceError()"
+              tone="danger"
+            />
+          }
+        }
       } @else {
         <div class="pokemon-silhouettes" aria-hidden="true">
           <img class="silhouette silhouette--flying silhouette--flying-left" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/823.png" alt="" />

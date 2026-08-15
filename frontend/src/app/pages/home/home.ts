@@ -51,6 +51,9 @@ export class Home implements OnInit {
   protected readonly isSearching = signal(false);
   protected readonly isScanning = signal(false);
   protected readonly wildSearchError = signal('');
+  protected readonly wildSearchAdvice = signal('');
+  protected readonly wildSearchAdviceError = signal('');
+  protected readonly isAdviceLoading = signal(false);
   protected readonly scannerMode = signal<'wild' | 'image'>('wild');
   protected readonly imageScannedPokemon = signal<PokemonDetail | null>(null);
   protected readonly suspectedPokemon = signal<AiScanSuspect | null>(null);
@@ -81,6 +84,8 @@ export class Home implements OnInit {
   protected startWildSearch(): void {
     this.isSearching.set(true);
     this.wildSearchError.set('');
+    this.wildSearchAdvice.set('');
+    this.wildSearchAdviceError.set('');
     this.scannedPokemon.set(null);
 
     this.pokemonService.getWildSearch().subscribe({
@@ -89,10 +94,33 @@ export class Home implements OnInit {
         this.isSearching.set(false);
       },
       error: () => {
-        this.wildSearchError.set(
-          'The habitat scanner could not find a signal. Please try again.',
-        );
+        this.wildSearchError.set('The habitat scanner could not find a signal. Please try again.');
         this.isSearching.set(false);
+      },
+    });
+  }
+
+  protected askForWildSearchAdvice(): void {
+    const encounter = this.encounter();
+
+    if (encounter.length !== 3 || this.isAdviceLoading()) {
+      return;
+    }
+
+    this.isAdviceLoading.set(true);
+    this.wildSearchAdvice.set('');
+    this.wildSearchAdviceError.set('');
+
+    this.aiService.getWildSearchAdvice(encounter).subscribe({
+      next: (advice) => {
+        this.wildSearchAdvice.set(advice);
+        this.isAdviceLoading.set(false);
+      },
+      error: () => {
+        this.wildSearchAdviceError.set(
+          'The Pokédex could not analyze this encounter. Please try again.',
+        );
+        this.isAdviceLoading.set(false);
       },
     });
   }
@@ -114,11 +142,7 @@ export class Home implements OnInit {
         scannedPokemonId: selectedPokemon.pokemonId,
         seenPokemonIds,
       })
-      .pipe(
-        switchMap(() =>
-          this.pokemonService.getPokemon(selectedPokemon.pokemonId),
-        ),
-      )
+      .pipe(switchMap(() => this.pokemonService.getPokemon(selectedPokemon.pokemonId)))
       .subscribe({
         next: (pokemon) => {
           if (!('types' in pokemon)) {
@@ -133,9 +157,7 @@ export class Home implements OnInit {
           this.loadRecentScans();
         },
         error: () => {
-          this.wildSearchError.set(
-            'The Pokémon scan could not be registered. Please try again.',
-          );
+          this.wildSearchError.set('The Pokémon scan could not be registered. Please try again.');
           this.isScanning.set(false);
         },
       });
@@ -189,9 +211,7 @@ export class Home implements OnInit {
 
     this.pokedexService
       .scanPokemon(suspect.pokemonId)
-      .pipe(
-        switchMap(() => this.pokemonService.getPokemon(suspect.pokemonId)),
-      )
+      .pipe(switchMap(() => this.pokemonService.getPokemon(suspect.pokemonId)))
       .subscribe({
         next: (pokemon) => {
           if (!('types' in pokemon)) {
