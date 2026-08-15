@@ -9,6 +9,27 @@ import { Prisma } from '@prisma/client/extension';
 
 type TransactionClient = Prisma.TransactionClient;
 
+const pokemonTypes = [
+  'normal',
+  'fire',
+  'water',
+  'electric',
+  'grass',
+  'ice',
+  'fighting',
+  'poison',
+  'ground',
+  'flying',
+  'psychic',
+  'bug',
+  'rock',
+  'ghost',
+  'dragon',
+  'dark',
+  'steel',
+  'fairy',
+] as const;
+
 @Injectable()
 export class PokedexService {
   constructor(
@@ -205,6 +226,48 @@ export class PokedexService {
       });
 
     return userPokemon?.status ?? null;
+  }
+
+  async getProgress(userId: number) {
+    const scannedPokemon = await this.prisma.userPokemon.findMany({
+      where: {
+        userId,
+        status: 'SCANNED',
+      },
+      select: {
+        pokemonId: true,
+      },
+    });
+
+    const typeCounts = new Map<string, number>(
+      pokemonTypes.map((type) => [type, 0]),
+    );
+    const batchSize = 25;
+
+    for (let index = 0; index < scannedPokemon.length; index += batchSize) {
+      const batch = scannedPokemon.slice(index, index + batchSize);
+      const pokemonTypeLists = await Promise.all(
+        batch.map((pokemon) =>
+          this.pokemonService.getPokemonTypes(pokemon.pokemonId),
+        ),
+      );
+
+      for (const types of pokemonTypeLists) {
+        for (const type of types) {
+          if (typeCounts.has(type)) {
+            typeCounts.set(type, (typeCounts.get(type) ?? 0) + 1);
+          }
+        }
+      }
+    }
+
+    return {
+      totalScanned: scannedPokemon.length,
+      byType: pokemonTypes.map((type) => ({
+        type,
+        count: typeCounts.get(type) ?? 0,
+      })),
+    };
   }
 
   async getPokedex(userId: number) {

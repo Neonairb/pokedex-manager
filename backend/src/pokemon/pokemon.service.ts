@@ -165,6 +165,28 @@ export class PokemonService {
     }
   }
 
+  async getPokemonTypes(id: number): Promise<string[]> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get(`/pokemon/${id}`),
+      );
+
+      return response.data.types.map(
+        (entry: { type: { name: string } }) => entry.type.name,
+      );
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        throw new NotFoundException(
+          `Pokemon with id ${id} was not found`,
+        );
+      }
+
+      throw new ServiceUnavailableException(
+        'Unable to retrieve Pokémon type data',
+      );
+    }
+  }
+
   async getPokemonIdByName(name: string): Promise<number> {
     const normalizedName = name.trim().toLowerCase();
 

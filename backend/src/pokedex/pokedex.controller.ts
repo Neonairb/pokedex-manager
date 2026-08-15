@@ -48,6 +48,13 @@ export class PokedexController {
     return this.pokedexService.getHistory(userId);
   }
 
+  @Get('progress')
+  getProgress(
+    @CurrentUserId() userId: number,
+  ) {
+    return this.pokedexService.getProgress(userId);
+  }
+
   @Get()
   getPokedex(
     @CurrentUserId() userId: number,
