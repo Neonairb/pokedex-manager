@@ -6,6 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PokemonModule } from './pokemon/pokemon.module';
 import { PokedexModule } from './pokedex/pokedex.module';
+import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { PokedexModule } from './pokedex/pokedex.module';
     AuthModule,
     PokemonModule,
     PokedexModule,
+    AiModule,
   ],
   controllers: [AppController],
   providers: [AppService],

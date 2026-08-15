@@ -165,6 +165,30 @@ export class PokemonService {
     }
   }
 
+  async getPokemonIdByName(name: string): Promise<number> {
+    const normalizedName = name.trim().toLowerCase();
+
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get(
+          `/pokemon-species/${encodeURIComponent(normalizedName)}`,
+        ),
+      );
+
+      return response.data.id;
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        throw new NotFoundException(
+          `Pokemon named ${normalizedName} was not found`,
+        );
+      }
+
+      throw new ServiceUnavailableException(
+        'Unable to resolve the identified Pokémon',
+      );
+    }
+  }
+
   async getPokemonSpeciesIds(): Promise<number[]> {
     try {
       const response = await firstValueFrom(
