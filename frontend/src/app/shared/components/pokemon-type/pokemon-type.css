@@ -1,0 +1,44 @@
+:host {
+  --type-color: #929da3;
+
+  display: inline-flex;
+  align-items: center;
+  min-width: 4.6rem;
+  gap: 0.3rem;
+  padding: 0.24rem 0.55rem 0.24rem 0.35rem;
+  border: 1px solid rgb(22 47 41 / 25%);
+  border-radius: 1rem;
+  background: var(--type-color);
+  box-shadow: inset 0 1px rgb(255 255 255 / 28%), 0 2px 0 rgb(31 61 51 / 16%);
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+img {
+  width: 1rem;
+  height: 1rem;
+  object-fit: contain;
+}
+
+:host([data-type='bug']) { --type-color: #92bc2c; }
+:host([data-type='dark']) { --type-color: #595761; }
+:host([data-type='dragon']) { --type-color: #0c69c8; }
+:host([data-type='electric']) { --type-color: #f2d94e; color: #3d4424; }
+:host([data-type='fairy']) { --type-color: #ee90e6; }
+:host([data-type='fighting']) { --type-color: #d3425f; }
+:host([data-type='fire']) { --type-color: #fba54c; }
+:host([data-type='flying']) { --type-color: #a1bbec; color: #304058; }
+:host([data-type='ghost']) { --type-color: #5f6dbc; }
+:host([data-type='grass']) { --type-color: #5fbd58; }
+:host([data-type='ground']) { --type-color: #da7c4d; }
+:host([data-type='ice']) { --type-color: #75d0c1; color: #294b46; }
+:host([data-type='normal']) { --type-color: #a0a29f; color: #303331; }
+:host([data-type='poison']) { --type-color: #b763cf; }
+:host([data-type='psychic']) { --type-color: #fa8581; }
+:host([data-type='rock']) { --type-color: #c9bb8a; color: #494431; }
+:host([data-type='steel']) { --type-color: #5695a3; }
+:host([data-type='water']) { --type-color: #539ddf; }

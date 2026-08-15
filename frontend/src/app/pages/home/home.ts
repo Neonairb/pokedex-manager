@@ -9,10 +9,11 @@ import {
 } from '../../core/models/pokedex.model';
 import { PokedexService } from '../../core/services/pokedex';
 import { PokemonService } from '../../core/services/pokemon';
+import { PokemonType } from '../../shared/components/pokemon-type/pokemon-type';
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink],
+  imports: [PokemonType, RouterLink],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })

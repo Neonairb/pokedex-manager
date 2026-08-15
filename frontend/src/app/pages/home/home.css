@@ -135,7 +135,6 @@ h2 { margin: 0; color: var(--color-screen-dark); font: 800 clamp(1rem, 3vw, 1.25
 .pokemon-info__data h3 { margin: 0.1rem 0 0.35rem; color: #234a2c; font: 900 clamp(1.25rem, 3vw, 2rem)/1 var(--font-family-display); text-transform: uppercase; }
 .pokemon-info__data > p { display: -webkit-box; overflow: hidden; margin: 0.55rem 0; color: #34573d; font-size: clamp(0.7rem, 1.4vw, 0.85rem); line-height: 1.35; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
 .type-list { display: flex; flex-wrap: wrap; gap: 0.3rem; }
-.type-list span { padding: 0.22rem 0.55rem; border: 1px solid rgb(45 86 59 / 32%); border-radius: 1rem; background: rgb(255 255 255 / 42%); color: #315e45; font-size: 0.62rem; font-weight: 900; text-transform: uppercase; }
 .pokemon-info dl { display: flex; gap: 1rem; margin: 0.5rem 0; }
 .pokemon-info dl div { display: flex; gap: 0.3rem; }
 .pokemon-info dt { color: #52715c; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; }

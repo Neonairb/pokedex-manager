@@ -111,7 +111,7 @@
             <h3>{{ pokemon.name }}</h3>
             <div class="type-list" aria-label="Pokémon types">
               @for (type of pokemon.types; track type) {
-                <span>{{ type }}</span>
+                <app-pokemon-type [type]="type" />
               }
             </div>
             <p>{{ pokemon.description || 'No Pokédex description is available.' }}</p>
