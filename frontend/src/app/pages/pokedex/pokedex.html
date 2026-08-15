@@ -1,1 +1,45 @@
-<p>pokedex works!</p>
+<section class="pokedex-view" aria-labelledby="pokedex-title">
+  <header class="screen-header">
+    <div class="trainer-greeting">
+      <span class="online-dot" aria-hidden="true"></span>
+      <h1 id="pokedex-title">National Pokédex</h1>
+    </div>
+
+    <nav class="screen-nav" aria-label="Main navigation">
+      <a class="nav-item" routerLink="/home">
+        <span aria-hidden="true">⌂</span>
+        Home
+      </a>
+      <a class="nav-item nav-item--active" aria-current="page">
+        <span aria-hidden="true">▦</span>
+        Pokédex
+      </a>
+    </nav>
+  </header>
+
+  <div class="pokedex-content">
+    <div class="pokedex-toolbar">
+      <div>
+        <p>Pokédex completion</p>
+        <strong>0 <span>/ 0000 registered</span></strong>
+      </div>
+
+      <div class="filter-list" aria-label="Pokédex filters">
+        <button class="filter-button filter-button--active" type="button">All</button>
+        <button class="filter-button" type="button">Scanned</button>
+        <button class="filter-button" type="button">Seen</button>
+      </div>
+    </div>
+
+    <div class="pokedex-grid" aria-label="Pokédex entries">
+      @for (slot of placeholderSlots; track slot) {
+        <article class="pokedex-placeholder" aria-label="Undiscovered Pokémon">
+          <span class="entry-number">#----</span>
+          <div class="unknown-pokeball" aria-hidden="true"></div>
+          <strong>???</strong>
+          <span class="entry-status">No data</span>
+        </article>
+      }
+    </div>
+  </div>
+</section>
