@@ -75,8 +75,14 @@ h2 { margin: 0; color: var(--color-screen-dark); font: 800 clamp(1rem, 3vw, 1.25
 .pokemon-silhouettes { position: absolute; z-index: 1; inset: 0; }
 .silhouette { position: absolute; bottom: 0.6rem; width: clamp(6rem, 16vw, 9.5rem); opacity: 0.2; filter: brightness(0) saturate(100%); object-fit: contain; }
 .silhouette--left { left: 3%; transform: rotate(-8deg); }
+.silhouette--left-inner { left: 27%; transform: translateX(-50%) rotate(-4deg) scale(0.88); }
 .silhouette--middle { left: 50%; opacity: 0.1; transform: translateX(-50%) scale(0.82); }
+.silhouette--right-inner { right: 27%; transform: translateX(50%) rotate(4deg) scale(0.88); }
 .silhouette--right { right: 3%; transform: rotate(8deg); }
+.silhouette--flying { top: 8%; bottom: auto; width: clamp(3.5rem, 9vw, 6.5rem); opacity: 0.1; }
+.silhouette--flying-left { left: 24%; transform: rotate(-10deg); }
+.silhouette--flying-middle { top: 4%; left: 55%; transform: translateX(-50%) rotate(5deg) scale(0.85); }
+.silhouette--flying-right { top: 12%; right: 16%; transform: rotate(12deg) scale(0.9); }
 
 .search-trigger {
   position: relative;
