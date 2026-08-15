@@ -1,1 +1,71 @@
-<p>home works!</p>
+<section class="home-screen" aria-labelledby="home-title">
+  <header class="screen-header">
+    <div class="trainer-greeting">
+      <span class="online-dot" aria-hidden="true"></span>
+      <div>
+        <p>Trainer database</p>
+        <h1 id="home-title">Welcome back, Trainer</h1>
+      </div>
+    </div>
+
+    <nav class="screen-nav" aria-label="Main navigation">
+      <a class="nav-item nav-item--active" aria-current="page">
+        <span aria-hidden="true">⌂</span>
+        Home
+      </a>
+      <a class="nav-item" routerLink="/pokedex">
+        <span aria-hidden="true">▦</span>
+        Pokédex
+      </a>
+    </nav>
+  </header>
+
+  <div class="home-content">
+    <section class="history-section" aria-labelledby="history-title">
+      <div class="section-heading">
+        <div>
+          <p class="section-kicker">Research log</p>
+          <h2 id="history-title">Recent scans</h2>
+        </div>
+        <span class="placeholder-count">— registered</span>
+      </div>
+
+      <div class="scan-list" aria-label="Recent scan placeholders">
+        @for (slot of [1, 2, 3, 4]; track slot) {
+          <article class="scan-placeholder">
+            <div class="sprite-placeholder" aria-hidden="true">
+              <span class="mini-pokeball"></span>
+            </div>
+            <div class="scan-placeholder__text">
+              <span></span>
+              <i></i>
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+
+    <section class="wild-search" aria-labelledby="search-title">
+      <div class="search-heading">
+        <p class="section-kicker">Nearby habitat</p>
+        <h2 id="search-title">Wild Search</h2>
+        <p>Who could be hiding nearby?</p>
+      </div>
+
+      <div class="pokemon-silhouettes" aria-hidden="true">
+        <img class="silhouette silhouette--left" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png" alt="" />
+        <img class="silhouette silhouette--middle" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png" alt="" />
+        <img class="silhouette silhouette--right" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/7.png" alt="" />
+      </div>
+
+      <button class="search-trigger" type="button" aria-describedby="search-note">
+        <span class="search-trigger__center" aria-hidden="true"><i></i></span>
+        <span class="search-trigger__label">Start</span>
+      </button>
+
+      <p class="search-instruction" id="search-note">Press to scan the area</p>
+      <div class="grass grass--back" aria-hidden="true"></div>
+      <div class="grass grass--front" aria-hidden="true"></div>
+    </section>
+  </div>
+</section>
