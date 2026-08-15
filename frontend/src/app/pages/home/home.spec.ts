@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
+import { AiService } from '../../core/services/ai';
 import { PokedexService } from '../../core/services/pokedex';
 import { PokemonService } from '../../core/services/pokemon';
 import { Auth } from '../../core/services/auth';
@@ -21,14 +22,21 @@ describe('Home', () => {
         },
       ]),
     ),
+    registerEncounter: vi.fn(),
+    scanPokemon: vi.fn(),
   };
   const pokemonService = {
     getWildSearch: vi.fn(() => of([])),
+    getPokemon: vi.fn(),
+  };
+  const aiService = {
+    scanImage: vi.fn(),
   };
 
   beforeEach(async () => {
     pokedexService.getScanHistory.mockClear();
     pokemonService.getWildSearch.mockClear();
+    aiService.scanImage.mockClear();
 
     await TestBed.configureTestingModule({
       imports: [Home],
@@ -40,6 +48,10 @@ describe('Home', () => {
         {
           provide: PokemonService,
           useValue: pokemonService,
+        },
+        {
+          provide: AiService,
+          useValue: aiService,
         },
         {
           provide: Auth,

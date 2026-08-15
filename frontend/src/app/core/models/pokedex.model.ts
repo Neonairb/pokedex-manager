@@ -41,3 +41,16 @@ export interface ScanPokemonResponse {
   pokemonId: number;
   status: 'SCANNED';
 }
+
+export interface AiScanSuspect {
+  requiresConfirmation: true;
+  pokemonId: number;
+  name: string;
+  sprite: string | null;
+}
+
+export type AiScanSuccess = PokemonDetail & {
+  requiresConfirmation: false;
+};
+
+export type AiImageScanResponse = AiScanSuccess | AiScanSuspect;

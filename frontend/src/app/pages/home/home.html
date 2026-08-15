@@ -82,7 +82,14 @@
       }
     </section>
 
-    <section class="wild-search" aria-labelledby="search-title">
+    <div class="scanner-card" [class.scanner-card--flipped]="scannerMode() === 'image'">
+      <div class="scanner-card__inner">
+    <section
+      class="wild-search scanner-face scanner-face--front"
+      aria-labelledby="search-title"
+      [attr.aria-hidden]="scannerMode() === 'image'"
+      [attr.inert]="scannerMode() === 'image' ? '' : null"
+    >
       <div class="search-heading">
         <h2 id="search-title">Wild Search</h2>
         @if (encounter().length > 0) {
@@ -94,38 +101,19 @@
         }
       </div>
 
+      <button class="mode-toggle" type="button" (click)="setScannerMode('image')">
+        <span aria-hidden="true">↻</span>
+        Image scan
+      </button>
+
       @if (wildSearchError()) {
         <div class="search-error" role="alert">{{ wildSearchError() }}</div>
       }
 
       @if (scannedPokemon(); as pokemon) {
-        <article class="pokemon-info">
-          <div class="pokemon-info__portrait">
-            @if (pokemon.sprite) {
-              <img [src]="pokemon.sprite" [alt]="pokemon.name" />
-            } @else {
-              <span class="mini-pokeball" aria-hidden="true"></span>
-            }
-          </div>
-          <div class="pokemon-info__data">
-            <span class="pokemon-number">#{{ pokemon.pokemonId.toString().padStart(4, '0') }}</span>
-            <h3>{{ pokemon.name }}</h3>
-            <div class="type-list" aria-label="Pokémon types">
-              @for (type of pokemon.types; track type) {
-                <app-pokemon-type [type]="type" />
-              }
-            </div>
-            <p>{{ pokemon.description || 'No Pokédex description is available.' }}</p>
-            <dl>
-              <div><dt>Height</dt><dd>{{ pokemon.height / 10 }} m</dd></div>
-              <div><dt>Weight</dt><dd>{{ pokemon.weight / 10 }} kg</dd></div>
-            </dl>
-            <button class="device-action" type="button" (click)="startWildSearch()">
-              <span class="device-action__radar" aria-hidden="true"></span>
-              <span>Search again</span>
-            </button>
-          </div>
-        </article>
+        <ng-container
+          *ngTemplateOutlet="pokemonInfo; context: { $implicit: pokemon, scanMode: 'wild' }"
+        />
       } @else if (encounter().length > 0) {
         <div class="encounter-list" aria-label="Wild Pokémon encounter">
           @for (pokemon of encounter(); track pokemon.pokemonId) {
@@ -183,5 +171,141 @@
       <div class="grass grass--back" aria-hidden="true"></div>
       <div class="grass grass--front" aria-hidden="true"></div>
     </section>
+
+    <section
+      class="wild-search image-scan scanner-face scanner-face--back"
+      aria-labelledby="image-scan-title"
+      [attr.aria-hidden]="scannerMode() === 'wild'"
+      [attr.inert]="scannerMode() === 'wild' ? '' : null"
+    >
+      <div class="search-heading">
+        <h2 id="image-scan-title">Image Scan</h2>
+        @if (imageScannedPokemon()) {
+          <p>Pokémon successfully registered</p>
+        } @else if (suspectedPokemon()) {
+          <p>Possible match detected</p>
+        } @else {
+          <p>Load a photo into the visual scanner</p>
+        }
+      </div>
+
+      <button class="mode-toggle" type="button" (click)="setScannerMode('wild')">
+        <span aria-hidden="true">↻</span>
+        Wild search
+      </button>
+
+      <input
+        #imageInput
+        class="image-input"
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        (change)="uploadPokemonImage(imageInput)"
+      />
+
+      @if (imageScanError()) {
+        <div class="search-error image-scan__error" role="alert">
+          {{ imageScanError() }}
+        </div>
+      }
+
+      @if (imageScannedPokemon(); as pokemon) {
+        <ng-container
+          *ngTemplateOutlet="pokemonInfo; context: { $implicit: pokemon, scanMode: 'image' }"
+        />
+      } @else if (suspectedPokemon(); as suspect) {
+        <article class="suspect-card" aria-live="polite">
+          <div class="suspect-card__portrait">
+            @if (suspect.sprite) {
+              <img [src]="suspect.sprite" [alt]="suspect.name" />
+            } @else {
+              <span class="mini-pokeball" aria-hidden="true"></span>
+            }
+          </div>
+          <div class="suspect-card__data">
+            <span class="pokemon-number">#{{ suspect.pokemonId.toString().padStart(4, '0') }}</span>
+            <h3>{{ suspect.name }}</h3>
+            <p>Is this the Pokémon in your image?</p>
+            <div class="confirmation-actions">
+              <button
+                class="device-action device-action--confirm"
+                type="button"
+                [disabled]="isConfirmingSuspect()"
+                (click)="confirmSuspectedPokemon()"
+              >
+                {{ isConfirmingSuspect() ? 'Registering…' : 'Yes, scan it' }}
+              </button>
+              <button
+                class="device-action device-action--secondary"
+                type="button"
+                [disabled]="isConfirmingSuspect()"
+                (click)="chooseAnotherImage(imageInput)"
+              >
+                No, try another
+              </button>
+            </div>
+          </div>
+        </article>
+      } @else {
+        <div class="image-scan__visual" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+
+        <button
+          class="search-trigger image-scan__trigger"
+          type="button"
+          aria-describedby="image-scan-note"
+          [disabled]="isImageScanning()"
+          (click)="imageInput.click()"
+        >
+          <span class="search-trigger__center" aria-hidden="true"><i></i></span>
+          <span class="search-trigger__label">
+            {{ isImageScanning() ? 'Reading' : 'Upload' }}
+          </span>
+        </button>
+
+        <p class="search-instruction" id="image-scan-note">
+          {{ isImageScanning() ? 'Analyzing visual data…' : 'Press to choose an image' }}
+        </p>
+      }
+
+      <div class="scan-wave scan-wave--back" aria-hidden="true"></div>
+      <div class="scan-wave scan-wave--front" aria-hidden="true"></div>
+    </section>
+      </div>
+    </div>
   </div>
+
+  <ng-template #pokemonInfo let-pokemon let-scanMode="scanMode">
+    <article class="pokemon-info">
+      <div class="pokemon-info__portrait">
+        @if (pokemon.sprite) {
+          <img [src]="pokemon.sprite" [alt]="pokemon.name" />
+        } @else {
+          <span class="mini-pokeball" aria-hidden="true"></span>
+        }
+      </div>
+      <div class="pokemon-info__data">
+        <span class="pokemon-number">#{{ pokemon.pokemonId.toString().padStart(4, '0') }}</span>
+        <h3>{{ pokemon.name }}</h3>
+        <div class="type-list" aria-label="Pokémon types">
+          @for (type of pokemon.types; track type) {
+            <app-pokemon-type [type]="type" />
+          }
+        </div>
+        <p>{{ pokemon.description || 'No Pokédex description is available.' }}</p>
+        <dl>
+          <div><dt>Height</dt><dd>{{ pokemon.height / 10 }} m</dd></div>
+          <div><dt>Weight</dt><dd>{{ pokemon.weight / 10 }} kg</dd></div>
+        </dl>
+        <button
+          class="device-action"
+          type="button"
+          (click)="scanMode === 'wild' ? startWildSearch() : resetImageScan()"
+        >
+          <span class="device-action__radar" aria-hidden="true"></span>
+          <span>{{ scanMode === 'wild' ? 'Search again' : 'Scan another image' }}</span>
+        </button>
+      </div>
+    </article>
+  </ng-template>
 </section>
