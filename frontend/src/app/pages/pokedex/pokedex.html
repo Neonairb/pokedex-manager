@@ -21,25 +21,63 @@
     <div class="pokedex-toolbar">
       <div>
         <p>Pokédex completion</p>
-        <strong>0 <span>/ 0000 registered</span></strong>
+        <strong>{{ scannedCount() }} <span>/ {{ entries().length }} registered</span></strong>
       </div>
 
       <div class="filter-list" aria-label="Pokédex filters">
-        <button class="filter-button filter-button--active" type="button">All</button>
-        <button class="filter-button" type="button">Scanned</button>
-        <button class="filter-button" type="button">Seen</button>
+        <button class="filter-button" [class.filter-button--active]="activeFilter() === 'ALL'" type="button" (click)="setFilter('ALL')">All</button>
+        <button class="filter-button" [class.filter-button--active]="activeFilter() === 'SCANNED'" type="button" (click)="setFilter('SCANNED')">Scanned</button>
+        <button class="filter-button" [class.filter-button--active]="activeFilter() === 'SEEN'" type="button" (click)="setFilter('SEEN')">Seen</button>
       </div>
     </div>
 
-    <div class="pokedex-grid" aria-label="Pokédex entries">
-      @for (slot of placeholderSlots; track slot) {
-        <article class="pokedex-placeholder" aria-label="Undiscovered Pokémon">
-          <span class="entry-number">#----</span>
-          <div class="unknown-pokeball" aria-hidden="true"></div>
-          <strong>???</strong>
-          <span class="entry-status">No data</span>
-        </article>
-      }
-    </div>
+    @if (isLoading()) {
+      <div class="pokedex-grid" aria-label="Loading Pokédex" aria-busy="true">
+        @for (slot of placeholderSlots; track slot) {
+          <article class="pokedex-entry pokedex-entry--unknown pokedex-entry--loading">
+            <span class="entry-number">#----</span>
+            <div class="unknown-pokeball" aria-hidden="true"></div>
+            <strong>???</strong>
+            <span class="entry-status">Loading</span>
+          </article>
+        }
+      </div>
+    } @else if (loadError()) {
+      <div class="pokedex-message" role="alert">
+        <span>Unable to load the National Pokédex.</span>
+        <button type="button" (click)="loadPokedex()">Retry connection</button>
+      </div>
+    } @else if (filteredEntries().length === 0) {
+      <div class="pokedex-message">
+        No Pokémon match this filter yet. Continue searching to expand your Pokédex.
+      </div>
+    } @else {
+      <div class="pokedex-grid" aria-label="Pokédex entries">
+        @for (entry of filteredEntries(); track entry.pokemonId) {
+          <article
+            class="pokedex-entry"
+            [class.pokedex-entry--unknown]="entry.status === null"
+            [class.pokedex-entry--seen]="entry.status === 'SEEN'"
+            [class.pokedex-entry--scanned]="entry.status === 'SCANNED'"
+            [attr.aria-label]="entry.status === null ? 'Undiscovered Pokédex entry' : entry.status === 'SEEN' ? 'Seen Pokémon number ' + entry.pokemonId : entry.name"
+          >
+            <span class="entry-number">#{{ entry.pokemonId.toString().padStart(4, '0') }}</span>
+
+            @if (entry.status === null) {
+              <div class="unknown-pokeball" aria-hidden="true"></div>
+            } @else if (entry.sprite) {
+              <div class="entry-sprite">
+                <img
+                  [src]="entry.sprite"
+                  [alt]="entry.status === 'SCANNED' && entry.name ? entry.name : 'Seen Pokémon'"
+                />
+              </div>
+            }
+
+            <strong>{{ entry.status === 'SCANNED' ? entry.name : '???' }}</strong>
+          </article>
+        }
+      </div>
+    }
   </div>
 </section>

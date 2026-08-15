@@ -46,25 +46,39 @@
   scrollbar-width: thin;
 }
 
-.pokedex-placeholder {
+.pokedex-entry {
   position: relative;
   display: grid;
   min-height: 9rem;
-  padding: 0.6rem;
+  padding: 1.6rem 0.6rem 0.6rem;
   border: 1px solid rgb(59 103 97 / 28%);
   border-radius: 0.75rem;
   background: rgb(255 255 255 / 30%);
   box-shadow: inset 0 1px rgb(255 255 255 / 45%);
   place-items: center;
+  transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
 }
 
 .entry-number { position: absolute; top: 0.5rem; left: 0.55rem; color: #77918c; font-size: 0.58rem; font-weight: 900; letter-spacing: 0.08em; }
 .unknown-pokeball { position: relative; width: 3.7rem; overflow: hidden; aspect-ratio: 1; border: 0.25rem solid #78948e; border-radius: 50%; background: linear-gradient(#9eb5af 0 43%, #78948e 43% 57%, #d6e6df 57%); opacity: 0.62; }
 .unknown-pokeball::after { position: absolute; inset: 50% auto auto 50%; width: 1rem; aspect-ratio: 1; border: 0.22rem solid #78948e; border-radius: 50%; background: #d6e6df; content: ''; transform: translate(-50%, -50%); }
-.pokedex-placeholder strong { color: #607b75; font: 900 0.8rem/1 var(--font-family-display); letter-spacing: 0.1em; }
+.pokedex-entry strong { overflow: hidden; max-width: 100%; margin-top: 0.45rem; color: #607b75; font: 900 0.8rem/1 var(--font-family-display); letter-spacing: 0.05em; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
 .entry-status { color: #829993; font-size: 0.55rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
 
+.entry-sprite { display: grid; width: 5.2rem; max-width: 82%; overflow: hidden; aspect-ratio: 1; border: 2px solid #718f89; border-radius: 0.7rem; background: rgb(255 255 255 / 35%); place-items: center; }
+.entry-sprite img { width: 94%; height: 94%; object-fit: contain; }
+.pokedex-entry--seen { border-color: rgb(54 142 205 / 55%); background: rgb(101 181 231 / 12%); }
+.pokedex-entry--seen .entry-sprite { border-color: #438ec1; box-shadow: inset 0 0 0 2px rgb(255 255 255 / 35%), 0 2px 0 rgb(42 102 144 / 20%); }
+.pokedex-entry--scanned { border-color: rgb(52 151 86 / 55%); background: rgb(93 190 122 / 13%); box-shadow: inset 0 1px rgb(255 255 255 / 55%), 0 2px 0 rgb(40 112 65 / 14%); }
+.pokedex-entry--scanned .entry-sprite { border-color: #3d9b5f; box-shadow: inset 0 0 0 2px rgb(255 255 255 / 42%), 0 2px 0 rgb(40 112 65 / 20%); }
+.pokedex-entry--scanned strong { color: #28593b; }
+.pokedex-entry--loading { animation: entry-pulse 1.25s ease-in-out infinite alternate; }
+
+.pokedex-message { display: flex; align-items: center; justify-content: center; min-height: 10rem; flex: 1; flex-direction: column; gap: 0.75rem; padding: 1rem; border: 1px dashed rgb(59 103 97 / 38%); border-radius: 0.8rem; background: rgb(255 255 255 / 24%); color: var(--color-screen-muted); font-size: 0.78rem; font-weight: 800; text-align: center; }
+.pokedex-message button { padding: 0.45rem 0.75rem; border: 2px solid var(--color-primary-dark); border-radius: 0.45rem; background: var(--color-primary); box-shadow: 0 3px 0 var(--color-primary-dark); color: var(--color-white); font-size: 0.68rem; font-weight: 900; cursor: pointer; text-transform: uppercase; }
+
 @keyframes pokedex-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes entry-pulse { to { opacity: 0.55; } }
 
 @media (max-width: 680px) {
   .pokedex-content { padding: 0.65rem; }
@@ -72,12 +86,15 @@
   .filter-list { width: 100%; }
   .filter-button { flex: 1; }
   .pokedex-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.45rem; }
-  .pokedex-placeholder { min-height: 7.5rem; padding: 0.4rem; }
+  .pokedex-entry { min-height: 7.5rem; padding: 1.45rem 0.4rem 0.4rem; }
   .unknown-pokeball { width: clamp(2.5rem, 14vw, 3.4rem); }
+  .entry-sprite { width: clamp(3.4rem, 18vw, 4.8rem); }
 }
 
 @media (max-width: 400px) {
   .pokedex-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-@media (prefers-reduced-motion: reduce) { .pokedex-view { animation: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .pokedex-view, .pokedex-entry--loading { animation: none; }
+}
