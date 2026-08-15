@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
 import { PokedexService } from '../../core/services/pokedex';
+import { PokemonService } from '../../core/services/pokemon';
 import { Home } from './home';
 
 describe('Home', () => {
@@ -20,9 +21,13 @@ describe('Home', () => {
       ]),
     ),
   };
+  const pokemonService = {
+    getWildSearch: vi.fn(() => of([])),
+  };
 
   beforeEach(async () => {
     pokedexService.getScanHistory.mockClear();
+    pokemonService.getWildSearch.mockClear();
 
     await TestBed.configureTestingModule({
       imports: [Home],
@@ -30,6 +35,10 @@ describe('Home', () => {
         {
           provide: PokedexService,
           useValue: pokedexService,
+        },
+        {
+          provide: PokemonService,
+          useValue: pokemonService,
         },
       ],
     }).compileComponents();

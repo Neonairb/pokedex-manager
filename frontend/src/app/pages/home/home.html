@@ -84,26 +84,101 @@
       <div class="search-heading">
         <p class="section-kicker">Nearby habitat</p>
         <h2 id="search-title">Wild Search</h2>
-        <p>Who could be hiding nearby?</p>
+        @if (encounter().length > 0) {
+          <p>Choose one Pokémon to scan</p>
+        } @else if (scannedPokemon()) {
+          <p>Pokémon successfully registered</p>
+        } @else {
+          <p>Who could be hiding nearby?</p>
+        }
       </div>
 
-      <div class="pokemon-silhouettes" aria-hidden="true">
-        <img class="silhouette silhouette--flying silhouette--flying-left" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/12.png" alt="" />
-        <img class="silhouette silhouette--flying silhouette--flying-middle" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/149.png" alt="" />
-        <img class="silhouette silhouette--flying silhouette--flying-right" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/823.png" alt="" />
-        <img class="silhouette silhouette--left" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/282.png" alt="" />
-        <img class="silhouette silhouette--left-inner" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/655.png" alt="" />
-        <img class="silhouette silhouette--middle" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/134.png" alt="" />
-        <img class="silhouette silhouette--right-inner" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/407.png" alt="" />
-        <img class="silhouette silhouette--right" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/428.png" alt="" />
-      </div>
+      @if (wildSearchError()) {
+        <div class="search-error" role="alert">{{ wildSearchError() }}</div>
+      }
 
-      <button class="search-trigger" type="button" aria-describedby="search-note">
-        <span class="search-trigger__center" aria-hidden="true"><i></i></span>
-        <span class="search-trigger__label">Start</span>
-      </button>
+      @if (scannedPokemon(); as pokemon) {
+        <article class="pokemon-info">
+          <div class="pokemon-info__portrait">
+            @if (pokemon.sprite) {
+              <img [src]="pokemon.sprite" [alt]="pokemon.name" />
+            } @else {
+              <span class="mini-pokeball" aria-hidden="true"></span>
+            }
+          </div>
+          <div class="pokemon-info__data">
+            <span class="pokemon-number">#{{ pokemon.pokemonId.toString().padStart(4, '0') }}</span>
+            <h3>{{ pokemon.name }}</h3>
+            <div class="type-list" aria-label="Pokémon types">
+              @for (type of pokemon.types; track type) {
+                <span>{{ type }}</span>
+              }
+            </div>
+            <p>{{ pokemon.description || 'No Pokédex description is available.' }}</p>
+            <dl>
+              <div><dt>Height</dt><dd>{{ pokemon.height / 10 }} m</dd></div>
+              <div><dt>Weight</dt><dd>{{ pokemon.weight / 10 }} kg</dd></div>
+            </dl>
+            <button class="device-action" type="button" (click)="startWildSearch()">
+              <span class="device-action__radar" aria-hidden="true"></span>
+              <span>Search again</span>
+            </button>
+          </div>
+        </article>
+      } @else if (encounter().length > 0) {
+        <div class="encounter-list" aria-label="Wild Pokémon encounter">
+          @for (pokemon of encounter(); track pokemon.pokemonId) {
+            <button
+              class="encounter-card"
+              type="button"
+              aria-label="Scan this Pokémon"
+              [disabled]="isScanning()"
+              (click)="scanPokemon(pokemon)"
+            >
+              @if (pokemon.status) {
+                <span
+                  class="status-ball"
+                  [class.status-ball--seen]="pokemon.status === 'SEEN'"
+                  [class.status-ball--scanned]="pokemon.status === 'SCANNED'"
+                  [attr.aria-label]="pokemon.status === 'SCANNED' ? 'Previously scanned' : 'Previously seen'"
+                ></span>
+              }
+              @if (pokemon.sprite) {
+                <img [src]="pokemon.sprite" [alt]="pokemon.name" />
+              } @else {
+                <span class="mini-pokeball" aria-hidden="true"></span>
+              }
+              <span class="encounter-card__action">{{ isScanning() ? 'Scanning…' : 'Scan' }}</span>
+            </button>
+          }
+        </div>
+      } @else {
+        <div class="pokemon-silhouettes" aria-hidden="true">
+          <img class="silhouette silhouette--flying silhouette--flying-left" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/12.png" alt="" />
+          <img class="silhouette silhouette--flying silhouette--flying-middle" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/149.png" alt="" />
+          <img class="silhouette silhouette--flying silhouette--flying-right" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/823.png" alt="" />
+          <img class="silhouette silhouette--left" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/282.png" alt="" />
+          <img class="silhouette silhouette--left-inner" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/655.png" alt="" />
+          <img class="silhouette silhouette--middle" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/134.png" alt="" />
+          <img class="silhouette silhouette--right-inner" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/407.png" alt="" />
+          <img class="silhouette silhouette--right" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/428.png" alt="" />
+        </div>
 
-      <p class="search-instruction" id="search-note">Press to scan the area</p>
+        <button
+          class="search-trigger"
+          type="button"
+          aria-describedby="search-note"
+          [disabled]="isSearching()"
+          (click)="startWildSearch()"
+        >
+          <span class="search-trigger__center" aria-hidden="true"><i></i></span>
+          <span class="search-trigger__label">{{ isSearching() ? 'Searching' : 'Start' }}</span>
+        </button>
+
+        <p class="search-instruction" id="search-note">
+          {{ isSearching() ? 'Scanning nearby habitat…' : 'Press to scan the area' }}
+        </p>
+      }
       <div class="grass grass--back" aria-hidden="true"></div>
       <div class="grass grass--front" aria-hidden="true"></div>
     </section>
