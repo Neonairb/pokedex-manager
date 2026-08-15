@@ -125,8 +125,11 @@
           @for (pokemon of encounter(); track pokemon.pokemonId) {
             <button
               class="encounter-card"
+              [class.encounter-card--left]="pokemon.position === 'left'"
+              [class.encounter-card--center]="pokemon.position === 'center'"
+              [class.encounter-card--right]="pokemon.position === 'right'"
               type="button"
-              aria-label="Scan this Pokémon"
+              [attr.aria-label]="'Scan the Pokémon in the ' + pokemon.position + ' position'"
               [disabled]="isScanning()"
               (click)="scanPokemon(pokemon)"
             >

@@ -119,6 +119,9 @@ h2 { margin: 0; color: var(--color-screen-dark); font: 800 clamp(1rem, 3vw, 1.25
 .scanner-message { position: absolute; z-index: 6; right: 1rem; bottom: 0.85rem; left: 1rem; }
 
 .encounter-list { position: relative; z-index: 4; display: grid; width: min(92%, 47rem); grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(0.65rem, 2vw, 1.2rem); padding-top: 2.7rem; }
+.encounter-card--left { grid-column: 1; }
+.encounter-card--center { grid-column: 2; }
+.encounter-card--right { grid-column: 3; }
 .encounter-card { position: relative; display: grid; min-width: 0; padding: 0.45rem 0.55rem 0.65rem; border: 2px solid #527b54; border-radius: 0.8rem; background: rgb(238 250 220 / 70%); box-shadow: 0 0.35rem 0 #527b54, inset 0 1px rgb(255 255 255 / 75%); color: var(--color-screen-dark); cursor: pointer; place-items: center; transition: transform 140ms ease, filter 140ms ease; }
 .encounter-card:hover:not(:disabled) { filter: brightness(1.04); transform: translateY(-0.25rem); }
 .encounter-card:disabled { cursor: wait; opacity: 0.75; }

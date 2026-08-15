@@ -5,6 +5,12 @@ export interface PokemonSummary {
   status: 'SEEN' | 'SCANNED' | null;
 }
 
+export type WildSearchPosition = 'left' | 'center' | 'right';
+
+export interface WildSearchPokemon extends PokemonSummary {
+  position: WildSearchPosition;
+}
+
 export interface PokemonDetail extends PokemonSummary {
   description: string | null;
   types: string[];

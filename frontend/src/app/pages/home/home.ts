@@ -7,8 +7,8 @@ import { switchMap } from 'rxjs';
 import {
   AiScanSuspect,
   PokemonDetail,
-  PokemonSummary,
   ScanHistoryEntry,
+  WildSearchPokemon,
 } from '../../core/models/pokedex.model';
 import { AiService } from '../../core/services/ai';
 import { PokedexService } from '../../core/services/pokedex';
@@ -46,7 +46,7 @@ export class Home implements OnInit {
   );
   protected readonly isHistoryLoading = signal(true);
   protected readonly historyError = signal(false);
-  protected readonly encounter = signal<PokemonSummary[]>([]);
+  protected readonly encounter = signal<WildSearchPokemon[]>([]);
   protected readonly scannedPokemon = signal<PokemonDetail | null>(null);
   protected readonly isSearching = signal(false);
   protected readonly isScanning = signal(false);
@@ -97,7 +97,7 @@ export class Home implements OnInit {
     });
   }
 
-  protected scanPokemon(selectedPokemon: PokemonSummary): void {
+  protected scanPokemon(selectedPokemon: WildSearchPokemon): void {
     if (this.isScanning()) {
       return;
     }

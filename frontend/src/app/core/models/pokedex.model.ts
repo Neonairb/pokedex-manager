@@ -8,6 +8,12 @@ export interface PokemonSummary {
   status: DiscoveryStatus;
 }
 
+export type WildSearchPosition = 'left' | 'center' | 'right';
+
+export interface WildSearchPokemon extends PokemonSummary {
+  position: WildSearchPosition;
+}
+
 export interface PokemonDetail extends PokemonSummary {
   description: string | null;
   types: string[];

@@ -8,6 +8,8 @@ import { firstValueFrom } from 'rxjs';
 import {
   PokemonDetail,
   PokemonSummary,
+  WildSearchPokemon,
+  WildSearchPosition,
 } from './interfaces/pokemon.interface';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -77,8 +79,13 @@ export class PokemonService {
 
   async getWildSearch(
     userId: number,
-  ): Promise<PokemonSummary[]> {
+  ): Promise<WildSearchPokemon[]> {
     const ids = this.getRandomUniqueIds(3);
+    const positions: WildSearchPosition[] = [
+      'left',
+      'center',
+      'right',
+    ];
 
     const pokemon = await Promise.all(
       ids.map((id) => this.getPokemonSummary(id)),
@@ -107,10 +114,11 @@ export class PokemonService {
       ]),
     );
 
-    return pokemon.map((item) => ({
+    return pokemon.map((item, index) => ({
       pokemonId: item.pokemonId,
       name: item.name,
       sprite: item.sprite,
+      position: positions[index],
 
       status:
         statusMap.get(item.pokemonId) ?? null,

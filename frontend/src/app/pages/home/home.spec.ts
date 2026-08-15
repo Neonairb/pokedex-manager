@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
+import { WildSearchPokemon } from '../../core/models/pokedex.model';
 import { AiService } from '../../core/services/ai';
 import { PokedexService } from '../../core/services/pokedex';
 import { PokemonService } from '../../core/services/pokemon';
@@ -26,7 +27,7 @@ describe('Home', () => {
     scanPokemon: vi.fn(),
   };
   const pokemonService = {
-    getWildSearch: vi.fn(() => of([])),
+    getWildSearch: vi.fn(() => of<WildSearchPokemon[]>([])),
     getPokemon: vi.fn(),
   };
   const aiService = {
@@ -75,5 +76,44 @@ describe('Home', () => {
     expect(pokedexService.getScanHistory).toHaveBeenCalledOnce();
     expect(element.textContent).toContain('#0025');
     expect(element.textContent).toContain('pikachu');
+  });
+
+  it('places wild Pokémon using the positions returned by the API', () => {
+    pokemonService.getWildSearch.mockReturnValueOnce(
+      of([
+        {
+          pokemonId: 1,
+          name: 'bulbasaur',
+          sprite: null,
+          status: null,
+          position: 'right',
+        },
+        {
+          pokemonId: 4,
+          name: 'charmander',
+          sprite: null,
+          status: null,
+          position: 'left',
+        },
+        {
+          pokemonId: 7,
+          name: 'squirtle',
+          sprite: null,
+          status: null,
+          position: 'center',
+        },
+      ]),
+    );
+
+    component['startWildSearch']();
+    fixture.detectChanges();
+
+    const cards = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll('.encounter-card'),
+    );
+
+    expect(cards[0].classList).toContain('encounter-card--right');
+    expect(cards[1].classList).toContain('encounter-card--left');
+    expect(cards[2].classList).toContain('encounter-card--center');
   });
 });

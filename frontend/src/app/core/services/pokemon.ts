@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment';
 import {
   PokemonDetail,
   PokemonSummary,
+  WildSearchPokemon,
 } from '../models/pokedex.model';
 
 @Service()
@@ -13,7 +14,7 @@ export class PokemonService {
   private readonly apiUrl = `${environment.apiUrl}/pokemon`;
 
   getWildSearch() {
-    return this.http.get<PokemonSummary[]>(`${this.apiUrl}/wild-search`);
+    return this.http.get<WildSearchPokemon[]>(`${this.apiUrl}/wild-search`);
   }
 
   getPokemon(pokemonId: number) {
