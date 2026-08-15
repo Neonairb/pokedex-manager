@@ -151,15 +151,17 @@
           }
         </div>
 
-        @if (wildSearchAdvice()) {
+        @if (wildSearchAdvice(); as advice) {
           <app-pokedex-message
             class="advice-message"
             code="PKDX ADVISOR"
             heading="Recommended scan"
-            [message]="wildSearchAdvice()"
+            [message]="advice"
             tone="info"
           />
-        } @else {
+        }
+
+        @if (!wildSearchAdvice()) {
           <button
             class="advice-trigger"
             type="button"

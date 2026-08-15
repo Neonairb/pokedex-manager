@@ -140,5 +140,8 @@ describe('Home', () => {
 
     expect(aiService.getWildSearchAdvice).toHaveBeenCalledWith(encounter);
     expect((fixture.nativeElement as HTMLElement).textContent).toContain(advice);
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('.advice-trigger'),
+    ).toBeNull();
   });
 });
