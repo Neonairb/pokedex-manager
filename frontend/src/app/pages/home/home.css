@@ -1,7 +1,10 @@
-:host { display: block; min-height: inherit; }
+:host { display: block; height: 100%; min-height: inherit; }
 
 .home-screen {
+  display: flex;
+  height: 100%;
   min-height: inherit;
+  flex-direction: column;
   color: var(--color-ink);
   animation: screen-in 220ms ease-out both;
 }
@@ -27,7 +30,14 @@
 .nav-item--active { border-color: rgb(142 23 33 / 22%); background: rgb(217 54 62 / 12%); color: var(--color-primary-dark); }
 .nav-item span { font-size: 1rem; }
 
-.home-content { display: grid; gap: clamp(0.8rem, 2vw, 1.2rem); padding: clamp(0.8rem, 2vw, 1.25rem); }
+.home-content {
+  display: grid;
+  min-height: 0;
+  flex: 1;
+  grid-template-rows: auto minmax(13.8rem, 1fr);
+  gap: clamp(0.8rem, 2vw, 1.2rem);
+  padding: clamp(0.8rem, 2vw, 1.25rem);
+}
 .history-section { min-width: 0; }
 .section-heading { display: flex; align-items: end; justify-content: space-between; margin-bottom: 0.55rem; }
 .section-kicker { margin: 0 0 0.12rem; color: var(--color-primary-dark); font-size: 0.6rem; font-weight: 900; letter-spacing: 0.16em; text-transform: uppercase; }
@@ -48,13 +58,13 @@ h2 { margin: 0; color: var(--color-screen-dark); font: 800 clamp(1rem, 3vw, 1.25
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 13.8rem;
+  min-height: 0;
   overflow: hidden;
   border: 2px solid #6b9253;
   border-radius: var(--border-radius-md);
   background:
     radial-gradient(circle at 50% 110%, rgb(255 240 132 / 72%), transparent 48%),
-    linear-gradient(#ccebb3 0 58%, #98c66f 58% 100%);
+    linear-gradient(#ccebb3 0 50%, #98c66f 50% 100%);
   box-shadow: inset 0 0 2rem rgb(50 99 48 / 16%), 0 5px 0 rgb(73 112 56 / 25%);
 }
 
@@ -104,13 +114,12 @@ h2 { margin: 0; color: var(--color-screen-dark); font: 800 clamp(1rem, 3vw, 1.25
   .screen-nav { gap: 0.1rem; }
   .nav-item { padding: 0.4rem; font-size: 0.65rem; }
   .nav-item span { display: none; }
-  .home-content { padding: 0.7rem; }
+  .home-content { grid-template-rows: auto minmax(14rem, 1fr); padding: 0.7rem; }
   .scan-list { display: flex; overflow: hidden; }
   .scan-placeholder { min-width: calc(33.333% - 0.45rem); }
   .scan-placeholder:nth-child(4) { display: none; }
   .scan-placeholder__text { display: none; }
   .sprite-placeholder { margin: auto; }
-  .wild-search { min-height: 14rem; }
   .search-trigger { width: 6.4rem; }
   .silhouette { width: 7rem; }
   .search-instruction { display: none; }
