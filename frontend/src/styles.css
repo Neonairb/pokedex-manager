@@ -1,1 +1,50 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --color-primary: #d9363e;
+  --color-primary-dark: #8e1721;
+  --color-primary-light: #f2555e;
+  --color-screen: #d9eee4;
+  --color-screen-dark: #183c3b;
+  --color-screen-muted: #55716c;
+  --color-ink: #132b2a;
+  --color-white: #fffaf1;
+  --color-yellow: #f4cb45;
+  --color-blue: #36aeea;
+  --color-green: #51be76;
+  --color-danger: #b4262d;
+  --font-family-primary: "Trebuchet MS", "Avenir Next", system-ui, sans-serif;
+  --font-family-display: "Arial Black", "Trebuchet MS", sans-serif;
+  --font-size-sm: 0.8rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.25rem;
+  --border-radius-sm: 0.5rem;
+  --border-radius-md: 1rem;
+  --border-radius-lg: 1.5rem;
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 2rem;
+  --shadow-device: 0 30px 70px rgb(37 8 11 / 35%);
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  background:
+    radial-gradient(circle at 50% 15%, rgb(255 255 255 / 70%), transparent 34rem),
+    linear-gradient(145deg, #f4e8da, #d8c6b5);
+  color: var(--color-ink);
+  font-family: var(--font-family-primary);
+}
+
+button,
+input { font: inherit; }
+
+button,
+a { -webkit-tap-highlight-color: transparent; }
