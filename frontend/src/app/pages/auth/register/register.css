@@ -1,0 +1,17 @@
+@import '../login/login.css';
+
+.register-panel { padding-block: clamp(1rem, 3vw, 1.65rem); }
+.register-panel .login-header { margin-block: 0.7rem 0.9rem; }
+.register-panel .pokeball-mark { width: 2.8rem; margin-bottom: 0.45rem; }
+.register-panel .login-form { gap: 0.75rem; }
+.password-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.register-panel .register-prompt { padding-top: 0.85rem; }
+
+@media (max-width: 720px) {
+  .password-fields { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 600px) {
+  .register-panel { padding-block: 0.8rem; }
+  .register-panel .login-header > p:last-child { display: none; }
+}
