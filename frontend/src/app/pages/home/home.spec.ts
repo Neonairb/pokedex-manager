@@ -3,6 +3,7 @@ import { of } from 'rxjs';
 
 import { PokedexService } from '../../core/services/pokedex';
 import { PokemonService } from '../../core/services/pokemon';
+import { Auth } from '../../core/services/auth';
 import { Home } from './home';
 
 describe('Home', () => {
@@ -39,6 +40,10 @@ describe('Home', () => {
         {
           provide: PokemonService,
           useValue: pokemonService,
+        },
+        {
+          provide: Auth,
+          useValue: { logout: vi.fn() },
         },
       ],
     }).compileComponents();

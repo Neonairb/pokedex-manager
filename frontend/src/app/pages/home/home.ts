@@ -1,5 +1,5 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { switchMap } from 'rxjs';
 
 import {
@@ -9,6 +9,7 @@ import {
 } from '../../core/models/pokedex.model';
 import { PokedexService } from '../../core/services/pokedex';
 import { PokemonService } from '../../core/services/pokemon';
+import { Auth } from '../../core/services/auth';
 import { PokemonType } from '../../shared/components/pokemon-type/pokemon-type';
 
 @Component({
@@ -20,6 +21,8 @@ import { PokemonType } from '../../shared/components/pokemon-type/pokemon-type';
 export class Home implements OnInit {
   private readonly pokedexService = inject(PokedexService);
   private readonly pokemonService = inject(PokemonService);
+  private readonly auth = inject(Auth);
+  private readonly router = inject(Router);
 
   protected readonly recentScans = signal<ScanHistoryEntry[]>([]);
   protected readonly emptyHistorySlots = computed(() =>
@@ -114,5 +117,10 @@ export class Home implements OnInit {
           this.isScanning.set(false);
         },
       });
+  }
+
+  protected logout(): void {
+    this.auth.logout();
+    void this.router.navigate(['/login']);
   }
 }
