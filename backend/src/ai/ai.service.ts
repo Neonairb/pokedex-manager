@@ -2,7 +2,7 @@ import { GoogleGenAI, Type } from '@google/genai';
 import {
   Inject,
   Injectable,
-  NotImplementedException,
+  NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { PokedexService } from '../pokedex/pokedex.service';
@@ -47,26 +47,34 @@ export class AiService {
     const identification = await this.identifyPokemon(image);
 
     if (!identification.identified || !identification.pokemonName) {
-      throw new NotImplementedException(
-        'The unidentified Pokémon flow is not implemented yet',
-      );
-    }
-
-    if (identification.confidence <= 0.5) {
-      throw new NotImplementedException(
-        'The low-confidence Pokémon flow is not implemented yet',
+      throw new NotFoundException(
+        'No recognizable Pokémon was identified in the image',
       );
     }
 
     const pokemonId = await this.pokemonService.getPokemonIdByName(
       identification.pokemonName,
     );
-    const scan = await this.pokedexService.scanPokemon(userId, pokemonId);
+
+    if (identification.confidence <= 0.5) {
+      const suspectedPokemon =
+        await this.pokemonService.getPokemonSummary(pokemonId);
+
+      return {
+        requiresConfirmation: true,
+        pokemonId: suspectedPokemon.pokemonId,
+        name: suspectedPokemon.name,
+        sprite: suspectedPokemon.sprite,
+      };
+    }
+
+    await this.pokedexService.scanPokemon(userId, pokemonId);
+    const pokemon = await this.pokemonService.getPokemonById(pokemonId);
 
     return {
-      ...identification,
-      pokemonId: scan.pokemonId,
+      ...pokemon,
       status: 'SCANNED',
+      requiresConfirmation: false,
     };
   }
 
@@ -119,8 +127,6 @@ export class AiService {
       if (error instanceof ServiceUnavailableException) {
         throw error;
       }
-
-      throw error;
 
       throw new ServiceUnavailableException(
         'Unable to identify the Pokémon in the image',

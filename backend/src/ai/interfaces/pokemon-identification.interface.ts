@@ -1,13 +1,21 @@
+import type { PokemonDetail } from '../../pokemon/interfaces/pokemon.interface';
+
 export interface PokemonIdentification {
   identified: boolean;
   pokemonName: string | null;
   confidence: number;
 }
 
-export interface PokemonImageScanResult extends PokemonIdentification {
+export interface SuspectedPokemon {
+  requiresConfirmation: true;
   pokemonId: number;
-  status: 'SCANNED';
+  name: string;
+  sprite: string | null;
 }
+
+export type PokemonImageScanResult =
+  | (PokemonDetail & { requiresConfirmation: false })
+  | SuspectedPokemon;
 
 export interface UploadedImage {
   buffer: Buffer;

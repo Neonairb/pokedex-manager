@@ -9,6 +9,8 @@ describe('AiService', () => {
   const generateContent = jest.fn();
   const pokemonService = {
     getPokemonIdByName: jest.fn(),
+    getPokemonSummary: jest.fn(),
+    getPokemonById: jest.fn(),
   };
   const pokedexService = {
     scanPokemon: jest.fn(),
@@ -54,6 +56,16 @@ describe('AiService', () => {
       }),
     });
     pokemonService.getPokemonIdByName.mockResolvedValue(25);
+    pokemonService.getPokemonById.mockResolvedValue({
+      pokemonId: 25,
+      name: 'pikachu',
+      sprite: 'pikachu.png',
+      description: 'A mouse Pokémon.',
+      types: ['electric'],
+      height: 4,
+      weight: 60,
+      status: null,
+    });
     pokedexService.scanPokemon.mockResolvedValue({
       pokemonId: 25,
       status: 'SCANNED',
@@ -65,16 +77,76 @@ describe('AiService', () => {
         mimetype: 'image/png',
       }),
     ).resolves.toEqual({
-      identified: true,
-      pokemonName: 'pikachu',
-      confidence: 0.97,
       pokemonId: 25,
+      name: 'pikachu',
+      sprite: 'pikachu.png',
+      description: 'A mouse Pokémon.',
+      types: ['electric'],
+      height: 4,
+      weight: 60,
       status: 'SCANNED',
+      requiresConfirmation: false,
     });
 
     expect(pokemonService.getPokemonIdByName).toHaveBeenCalledWith(
       'pikachu',
     );
     expect(pokedexService.scanPokemon).toHaveBeenCalledWith(7, 25);
+    expect(pokemonService.getPokemonById).toHaveBeenCalledWith(25);
+  });
+
+  it('returns an unscanned suspect when confidence is 50% or lower', async () => {
+    generateContent.mockResolvedValue({
+      text: JSON.stringify({
+        identified: true,
+        pokemonName: 'eevee',
+        confidence: 0.42,
+      }),
+    });
+    pokemonService.getPokemonIdByName.mockResolvedValue(133);
+    pokemonService.getPokemonSummary.mockResolvedValue({
+      pokemonId: 133,
+      name: 'eevee',
+      sprite: 'eevee.png',
+      status: null,
+    });
+
+    await expect(
+      service.scanPokemonImage(7, {
+        buffer: Buffer.from('image'),
+        mimetype: 'image/jpeg',
+      }),
+    ).resolves.toEqual({
+      requiresConfirmation: true,
+      pokemonId: 133,
+      name: 'eevee',
+      sprite: 'eevee.png',
+    });
+
+    expect(pokedexService.scanPokemon).not.toHaveBeenCalled();
+    expect(pokemonService.getPokemonById).not.toHaveBeenCalled();
+  });
+
+  it('returns not found when no Pokémon is recognized', async () => {
+    generateContent.mockResolvedValue({
+      text: JSON.stringify({
+        identified: false,
+        pokemonName: null,
+        confidence: 0,
+      }),
+    });
+
+    await expect(
+      service.scanPokemonImage(7, {
+        buffer: Buffer.from('image'),
+        mimetype: 'image/webp',
+      }),
+    ).rejects.toMatchObject({
+      status: 404,
+      message: 'No recognizable Pokémon was identified in the image',
+    });
+
+    expect(pokemonService.getPokemonIdByName).not.toHaveBeenCalled();
+    expect(pokedexService.scanPokemon).not.toHaveBeenCalled();
   });
 });
