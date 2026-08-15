@@ -6,6 +6,7 @@ import { environment } from '../../../environments/environment';
 
 import {
   AuthResponse,
+  AuthenticatedTrainer,
   LoginRequest,
   RegisterRequest,
 } from '../models/auth.model';
@@ -42,6 +43,10 @@ export class Auth {
           this.saveToken(response.accessToken);
         }),
       );
+  }
+
+  getCurrentTrainer() {
+    return this.http.get<AuthenticatedTrainer>(`${this.apiUrl}/me`);
   }
 
   logout(): void {

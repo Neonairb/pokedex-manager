@@ -1,6 +1,12 @@
 export interface AuthUser {
   id: number;
   email: string;
+  createdAt?: string;
+}
+
+export interface AuthenticatedTrainer {
+  sub: number;
+  email: string;
 }
 
 export interface AuthResponse {
