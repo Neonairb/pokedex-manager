@@ -27,22 +27,57 @@
           <p class="section-kicker">Research log</p>
           <h2 id="history-title">Recent scans</h2>
         </div>
-        <span class="placeholder-count">— registered</span>
       </div>
 
-      <div class="scan-list" aria-label="Recent scan placeholders">
-        @for (slot of [1, 2, 3, 4]; track slot) {
-          <article class="scan-placeholder">
-            <div class="sprite-placeholder" aria-hidden="true">
-              <span class="mini-pokeball"></span>
-            </div>
-            <div class="scan-placeholder__text">
-              <span></span>
-              <i></i>
-            </div>
-          </article>
-        }
-      </div>
+      @if (isHistoryLoading()) {
+        <div class="scan-list" aria-label="Loading recent scans" aria-busy="true">
+          @for (slot of [1, 2, 3, 4, 5]; track slot) {
+            <article class="scan-placeholder">
+              <div class="sprite-placeholder" aria-hidden="true">
+                <span class="mini-pokeball"></span>
+              </div>
+              <div class="scan-placeholder__text" aria-hidden="true">
+                <span></span>
+                <i></i>
+              </div>
+            </article>
+          }
+        </div>
+      } @else if (historyError()) {
+        <div class="history-message" role="alert">
+          <span>Recent scan data unavailable.</span>
+          <button type="button" (click)="loadRecentScans()">Retry</button>
+        </div>
+      } @else {
+        <div class="scan-list" aria-label="Recently scanned Pokémon">
+          @for (scan of recentScans(); track scan.scannedAt) {
+            <article class="scan-card">
+              <div class="scan-card__sprite">
+                @if (scan.sprite) {
+                  <img [src]="scan.sprite" [alt]="scan.name" />
+                } @else {
+                  <span class="mini-pokeball" aria-hidden="true"></span>
+                }
+              </div>
+              <div class="scan-card__details">
+                <span>#{{ scan.pokemonId.toString().padStart(4, '0') }}</span>
+                <strong>{{ scan.name }}</strong>
+              </div>
+            </article>
+          }
+          @for (slot of emptyHistorySlots(); track $index) {
+            <article class="scan-placeholder" aria-label="Empty scan slot">
+              <div class="sprite-placeholder" aria-hidden="true">
+                <span class="mini-pokeball"></span>
+              </div>
+              <div class="scan-placeholder__text" aria-hidden="true">
+                <span></span>
+                <i></i>
+              </div>
+            </article>
+          }
+        </div>
+      }
     </section>
 
     <section class="wild-search" aria-labelledby="search-title">
